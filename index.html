@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Grade Calculator // DEDSEC</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #08080c;
+        --surface: #101014;
+        --accent: #00f3ff;
+        --pink: #ff0055;
+        --text: #e0e0e0;
+        --dim: #707075;
+        --border: #1f1f23;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "IBM Plex Mono", monospace;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        padding: 30px;
+        width: 100%;
+        max-width: 400px;
+        box-shadow: 10px 10px 0 var(--border);
+      }
+      .header {
+        font-size: 0.7rem;
+        color: var(--dim);
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+      }
+      h1 {
+        font-size: 1.4rem;
+        margin-bottom: 25px;
+        text-transform: uppercase;
+        color: #fff;
+      }
+      label {
+        display: block;
+        font-size: 0.7rem;
+        color: var(--accent);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+      }
+      input {
+        width: 100%;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        padding: 12px;
+        color: #fff;
+        font-family: inherit;
+        margin-bottom: 5px;
+      }
+      input:focus {
+        outline: none;
+        border-color: var(--accent);
+      }
+      input:invalid {
+        border-color: var(--pink);
+      }
+      .error {
+        color: var(--pink);
+        font-size: 0.65rem;
+        margin-bottom: 15px;
+        height: 1em;
+      }
+      .btn {
+        width: 100%;
+        background: transparent;
+        border: 1px solid var(--pink);
+        color: var(--pink);
+        padding: 12px;
+        font-weight: bold;
+        cursor: pointer;
+        text-transform: uppercase;
+        transition: 0.3s;
+      }
+      .btn:hover {
+        background: var(--pink);
+        color: #fff;
+        box-shadow: 0 0 10px var(--pink);
+      }
+      .result {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border);
+      }
+      #res {
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--accent);
+        text-shadow: 0 0 10px var(--accent);
+      }
+      .res-label {
+        font-size: 0.75rem;
+        color: var(--dim);
+        margin-bottom: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <div class="header">
+        <span>[ ID: GHOST_PROCESS ]</span><span>v1.0.4</span>
+      </div>
+      <h1>Grade Calculator</h1>
+      <div class="input-group">
+        <label for="score">Score (0-100)</label>
+        <input
+          type="number"
+          id="score"
+          min="0"
+          max="100"
+          placeholder="e.g. 85"
+          aria-describedby="err"
+        />
+        <p id="err" class="error" role="alert"></p>
+      </div>
+      <button class="btn" id="btn">Calculate</button>
+      <div class="result" aria-live="polite">
+        <p class="res-label">Result // Grade:</p>
+        <div id="res">--</div>
+      </div>
+    </main>
+    <script>
+      const scoreInput = document.getElementById("score");
+      const err = document.getElementById("err");
+      const res = document.getElementById("res");
+      const btn = document.getElementById("btn");
+
+      const calculateGrade = (n) => {
+        if (n === null || n === "") return "--";
+        const s = parseFloat(n);
+        if (isNaN(s) || s < 0 || s > 100) return "INVALID";
+        if (s >= 90) return "A+";
+        if (s >= 80) return "A";
+        if (s >= 70) return "B";
+        if (s >= 60) return "C";
+        if (s >= 50) return "D";
+        return "F";
+      };
+
+      const validate = () => {
+        const val = scoreInput.value;
+        if (val !== "" && (val < 0 || val > 100)) {
+          err.textContent = "SYSTEM_ERROR: Range 0-100 only";
+          btn.disabled = true;
+          btn.style.opacity = "0.5";
+        } else {
+          err.textContent = "";
+          btn.disabled = false;
+          btn.style.opacity = "1";
+        }
+      };
+
+      scoreInput.addEventListener("input", validate);
+      btn.addEventListener("click", () => {
+        res.textContent = calculateGrade(scoreInput.value);
+      });
+
+      // For testing
+        window.calculateGrade = calculateGrade;
+    </script>
+  </body>
+</html>

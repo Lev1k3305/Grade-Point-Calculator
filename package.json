@@ -1,0 +1,20 @@
+{
+  "name": "grade-point-calculator",
+  "version": "1.0.0",
+  "description": "Accessible Grade Point Calculator with Cyberpunk theme",
+  "main": "index.html",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "@eslint/js": "^9.0.0",
+    "globals": "^15.0.0",
+    "prettier": "^3.0.0",
+    "vitest": "^1.0.0",
+    "jsdom": "^24.0.0"
+  }
+}
