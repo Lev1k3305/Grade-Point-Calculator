@@ -1,0 +1,30 @@
+{
+  "name": "grade-point-calculator",
+  "version": "1.0.0",
+  "description": "A clean and accessible Grade Point Calculator",
+  "main": "script.js",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "keywords": [
+    "gpa",
+    "calculator",
+    "education",
+    "accessibility"
+  ],
+  "author": "Palette",
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@vitest/coverage-v8": "^4.1.8",
+    "eslint": "^10.4.1",
+    "globals": "^17.6.0",
+    "jsdom": "^29.1.1",
+    "prettier": "^3.8.4",
+    "vitest": "^4.1.8"
+  }
+}
