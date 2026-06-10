@@ -110,6 +110,10 @@
         color: var(--accent);
         text-shadow: 0 0 10px var(--accent);
       }
+      #res.fail {
+        color: var(--pink);
+        text-shadow: 0 0 10px var(--pink);
+      }
       .res-label {
         font-size: 0.75rem;
         color: var(--dim);
@@ -132,6 +136,8 @@
           max="100"
           placeholder="e.g. 85"
           aria-describedby="err"
+          aria-invalid="false"
+          autofocus
         />
         <p id="err" class="error" role="alert"></p>
       </div>
@@ -163,22 +169,31 @@
         const val = scoreInput.value;
         if (val !== "" && (val < 0 || val > 100)) {
           err.textContent = "SYSTEM_ERROR: Range 0-100 only";
+          scoreInput.setAttribute("aria-invalid", "true");
           btn.disabled = true;
           btn.style.opacity = "0.5";
+          res.textContent = "--";
+          res.classList.remove("fail");
         } else {
           err.textContent = "";
+          scoreInput.setAttribute("aria-invalid", "false");
           btn.disabled = false;
           btn.style.opacity = "1";
         }
       };
 
       scoreInput.addEventListener("input", validate);
+      scoreInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") btn.click();
+      });
       btn.addEventListener("click", () => {
-        res.textContent = calculateGrade(scoreInput.value);
+        const grade = calculateGrade(scoreInput.value);
+        res.textContent = grade;
+        res.classList.toggle("fail", grade === "F");
       });
 
       // For testing
-        window.calculateGrade = calculateGrade;
+      window.calculateGrade = calculateGrade;
     </script>
   </body>
 </html>
