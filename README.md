@@ -3,6 +3,7 @@
 An accessible, Cyberpunk-themed Grade Point Calculator with a focus on UX excellence.
 
 ## ✨ Features
+
 - **Responsive UI:** Modern, accessible design using the IBM Plex Mono font.
 - **Micro-UX:** Real-time inline validation and tactile feedback.
 - **Accessible:** Proper ARIA labels and `aria-live` for result announcements.
@@ -11,10 +12,12 @@ An accessible, Cyberpunk-themed Grade Point Calculator with a focus on UX excell
 ## 🚀 Getting Started
 
 ### Local Setup
+
 1. Clone the repository.
 2. Open `index.html` in your browser.
 
 ### Development
+
 1. Install dependencies:
    ```bash
    pnpm install
@@ -30,4 +33,5 @@ An accessible, Cyberpunk-themed Grade Point Calculator with a focus on UX excell
    ```
 
 ---
-*Created with care by Jules (Palette 🎨)*
+
+_Created with care by Jules (Palette 🎨)_

@@ -94,10 +94,13 @@
         text-transform: uppercase;
         transition: 0.3s;
       }
-      .btn:hover {
+      .btn:hover:not(:disabled) {
         background: var(--pink);
         color: #fff;
         box-shadow: 0 0 10px var(--pink);
+      }
+      .btn:disabled {
+        cursor: not-allowed;
       }
       .result {
         margin-top: 30px;
@@ -109,6 +112,11 @@
         font-weight: bold;
         color: var(--accent);
         text-shadow: 0 0 10px var(--accent);
+        transition: color 0.3s ease;
+      }
+      #res.fail {
+        color: var(--pink);
+        text-shadow: 0 0 10px var(--pink);
       }
       .res-label {
         font-size: 0.75rem;
@@ -132,6 +140,7 @@
           max="100"
           placeholder="e.g. 85"
           aria-describedby="err"
+          autofocus
         />
         <p id="err" class="error" role="alert"></p>
       </div>
@@ -173,12 +182,23 @@
       };
 
       scoreInput.addEventListener("input", validate);
+      scoreInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !btn.disabled) {
+          btn.click();
+        }
+      });
       btn.addEventListener("click", () => {
-        res.textContent = calculateGrade(scoreInput.value);
+        const grade = calculateGrade(scoreInput.value);
+        res.textContent = grade;
+        if (grade === "F" || grade === "INVALID") {
+          res.classList.add("fail");
+        } else {
+          res.classList.remove("fail");
+        }
       });
 
       // For testing
-        window.calculateGrade = calculateGrade;
+      window.calculateGrade = calculateGrade;
     </script>
   </body>
 </html>
