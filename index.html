@@ -82,6 +82,7 @@
         font-size: 0.65rem;
         margin-bottom: 15px;
         height: 1em;
+        transition: all 0.3s ease;
       }
       .btn {
         width: 100%;
@@ -92,12 +93,18 @@
         font-weight: bold;
         cursor: pointer;
         text-transform: uppercase;
-        transition: 0.3s;
+        transition: all 0.3s ease;
       }
       .btn:hover {
         background: var(--pink);
         color: #fff;
         box-shadow: 0 0 10px var(--pink);
+      }
+      .btn:active {
+        transform: scale(0.98);
+      }
+      .btn:disabled {
+        cursor: not-allowed;
       }
       .result {
         margin-top: 30px;
@@ -109,6 +116,7 @@
         font-weight: bold;
         color: var(--accent);
         text-shadow: 0 0 10px var(--accent);
+        transition: all 0.3s ease;
       }
       #res.fail {
         color: var(--pink);
@@ -142,7 +150,7 @@
         <p id="err" class="error" role="alert"></p>
       </div>
       <button class="btn" id="btn">Calculate</button>
-      <div class="result" aria-live="polite">
+      <div class="result" aria-live="polite" aria-atomic="true">
         <p class="res-label">Result // Grade:</p>
         <div id="res">--</div>
       </div>
@@ -179,6 +187,10 @@
           scoreInput.setAttribute("aria-invalid", "false");
           btn.disabled = false;
           btn.style.opacity = "1";
+          // Live calculate
+          const grade = calculateGrade(val);
+          res.textContent = grade;
+          res.classList.toggle("fail", grade === "F");
         }
       };
 
