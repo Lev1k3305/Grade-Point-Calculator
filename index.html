@@ -132,6 +132,34 @@
         color: var(--dim);
         margin-bottom: 5px;
       }
+      .res-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .copy-btn {
+        background: transparent;
+        border: 1px solid var(--accent);
+        color: var(--accent);
+        font-size: 0.7rem;
+        padding: 4px 8px;
+        cursor: pointer;
+        font-family: inherit;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+      }
+      .copy-btn:hover {
+        background: var(--accent);
+        color: var(--bg);
+        box-shadow: 0 0 10px var(--accent);
+      }
+      .copy-btn:active {
+        transform: scale(0.95);
+      }
+      .hidden {
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -158,7 +186,10 @@
       <button class="btn" id="btn">Calculate</button>
       <div class="result" aria-live="polite" aria-atomic="true">
         <p class="res-label">Result // Grade:</p>
-        <div id="res">--</div>
+        <div class="res-wrap">
+          <div id="res">--</div>
+          <button id="copy-btn" class="copy-btn hidden" aria-label="Copy grade to clipboard">[COPY]</button>
+        </div>
       </div>
     </main>
     <script>
@@ -166,6 +197,7 @@
       const err = document.getElementById("err");
       const res = document.getElementById("res");
       const btn = document.getElementById("btn");
+      const copyBtn = document.getElementById("copy-btn");
 
       const calculateGrade = (n) => {
         if (n === null || n === "") return "--";
@@ -188,6 +220,7 @@
           btn.style.opacity = "0.5";
           res.textContent = "--";
           res.classList.remove("fail");
+          copyBtn.classList.add("hidden");
         } else {
           err.textContent = "";
           scoreInput.setAttribute("aria-invalid", "false");
@@ -197,6 +230,12 @@
           const grade = calculateGrade(val);
           res.textContent = grade;
           res.classList.toggle("fail", grade === "F");
+
+          if (["A+", "A", "B", "C", "D", "F"].includes(grade)) {
+            copyBtn.classList.remove("hidden");
+          } else {
+            copyBtn.classList.add("hidden");
+          }
         }
       };
 
@@ -206,11 +245,21 @@
       });
       scoreInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") btn.click();
+        if (e.key === "Escape") {
+          scoreInput.value = "";
+          validate();
+        }
       });
-      btn.addEventListener("click", () => {
-        const grade = calculateGrade(scoreInput.value);
-        res.textContent = grade;
-        res.classList.toggle("fail", grade === "F");
+      btn.addEventListener("click", validate);
+
+      copyBtn.addEventListener("click", () => {
+        navigator.clipboard.writeText(res.textContent).then(() => {
+          const originalText = copyBtn.textContent;
+          copyBtn.textContent = "[COPIED]";
+          setTimeout(() => {
+            copyBtn.textContent = originalText;
+          }, 1500);
+        });
       });
 
       // For testing
