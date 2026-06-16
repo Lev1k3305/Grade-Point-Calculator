@@ -111,8 +111,17 @@
         outline: 2px solid var(--accent);
         outline-offset: 2px;
       }
+      .shortcuts {
+        margin-top: 10px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.6rem;
+        color: var(--dim);
+        text-transform: uppercase;
+        pointer-events: none;
+      }
       .result {
-        margin-top: 30px;
+        margin-top: 25px;
         padding-top: 20px;
         border-top: 1px solid var(--border);
       }
@@ -184,11 +193,21 @@
         <p id="err" class="error" role="alert"></p>
       </div>
       <button class="btn" id="btn">Calculate</button>
+      <div class="shortcuts">
+        <span>[ENTER] TO CALC</span>
+        <span>[ESC] TO RESET</span>
+      </div>
       <div class="result" aria-live="polite" aria-atomic="true">
         <p class="res-label">Result // Grade:</p>
         <div class="res-wrap">
           <div id="res">--</div>
-          <button id="copy-btn" class="copy-btn hidden" aria-label="Copy grade to clipboard">[COPY]</button>
+          <button
+            id="copy-btn"
+            class="copy-btn hidden"
+            aria-label="Copy grade to clipboard"
+          >
+            [COPY]
+          </button>
         </div>
       </div>
     </main>
@@ -245,19 +264,31 @@
       });
       scoreInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") btn.click();
+      });
+
+      window.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
           scoreInput.value = "";
           validate();
+          scoreInput.focus();
         }
       });
+
       btn.addEventListener("click", validate);
 
       copyBtn.addEventListener("click", () => {
         navigator.clipboard.writeText(res.textContent).then(() => {
           const originalText = copyBtn.textContent;
+          const originalAria = copyBtn.getAttribute("aria-label");
           copyBtn.textContent = "[COPIED]";
+          copyBtn.setAttribute("aria-label", "Copied to clipboard");
           setTimeout(() => {
             copyBtn.textContent = originalText;
+            if (originalAria) {
+              copyBtn.setAttribute("aria-label", originalAria);
+            } else {
+              copyBtn.removeAttribute("aria-label");
+            }
           }, 1500);
         });
       });
