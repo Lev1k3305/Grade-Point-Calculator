@@ -132,9 +132,26 @@
         text-shadow: 0 0 10px var(--accent);
         transition: all 0.3s ease;
       }
-      #res.fail {
-        color: var(--pink);
-        text-shadow: 0 0 10px var(--pink);
+      #res.fail,
+      .status-fail {
+        color: var(--pink) !important;
+        text-shadow: 0 0 10px var(--pink) !important;
+      }
+      .status-good {
+        color: var(--accent) !important;
+        text-shadow: 0 0 10px var(--accent) !important;
+      }
+      .status-ok {
+        color: #f1c40f !important;
+        text-shadow: 0 0 10px #f1c40f !important;
+      }
+      .status-msg {
+        font-size: 0.6rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        letter-spacing: 1px;
+        min-height: 1em;
       }
       .res-label {
         font-size: 0.75rem;
@@ -184,6 +201,7 @@
           id="score"
           min="0"
           max="100"
+          inputmode="decimal"
           placeholder="e.g. 85"
           aria-describedby="err"
           aria-invalid="false"
@@ -199,6 +217,7 @@
       </div>
       <div class="result" aria-live="polite" aria-atomic="true">
         <p class="res-label">Result // Grade:</p>
+        <p id="status" class="status-msg"></p>
         <div class="res-wrap">
           <div id="res">--</div>
           <button
@@ -215,6 +234,7 @@
       const scoreInput = document.getElementById("score");
       const err = document.getElementById("err");
       const res = document.getElementById("res");
+      const status = document.getElementById("status");
       const btn = document.getElementById("btn");
       const copyBtn = document.getElementById("copy-btn");
 
@@ -232,23 +252,56 @@
 
       const validate = () => {
         const val = scoreInput.value;
+        // Reset classes
+        res.classList.remove("fail", "status-good", "status-ok", "status-fail");
+        status.classList.remove(
+          "status-good",
+          "status-ok",
+          "status-fail",
+          "status-dim",
+        );
+
         if (val !== "" && (val < 0 || val > 100)) {
           err.textContent = "SYSTEM_ERROR: Range 0-100 only";
           scoreInput.setAttribute("aria-invalid", "true");
           btn.disabled = true;
           btn.style.opacity = "0.5";
           res.textContent = "--";
-          res.classList.remove("fail");
+          status.textContent = "";
           copyBtn.classList.add("hidden");
         } else {
           err.textContent = "";
           scoreInput.setAttribute("aria-invalid", "false");
           btn.disabled = false;
           btn.style.opacity = "1";
-          // Live calculate
+
           const grade = calculateGrade(val);
           res.textContent = grade;
-          res.classList.toggle("fail", grade === "F");
+
+          let statusText = "";
+          let statusClass = "";
+
+          if (grade === "A+") {
+            statusText = "EXCELLENT // DISTINCTION";
+            statusClass = "status-good";
+          } else if (grade === "A" || grade === "B") {
+            statusText = "GOOD // ABOVE_AVERAGE";
+            statusClass = "status-good";
+          } else if (grade === "C" || grade === "D") {
+            statusText = "SATISFACTORY // PASS";
+            statusClass = "status-ok";
+          } else if (grade === "F") {
+            statusText = "FAIL // SYSTEM_REBOOT_REQUIRED";
+            statusClass = "status-fail";
+          }
+
+          if (statusClass) {
+            status.textContent = statusText;
+            status.classList.add(statusClass);
+            res.classList.add(statusClass);
+          } else {
+            status.textContent = "";
+          }
 
           if (["A+", "A", "B", "C", "D", "F"].includes(grade)) {
             copyBtn.classList.remove("hidden");

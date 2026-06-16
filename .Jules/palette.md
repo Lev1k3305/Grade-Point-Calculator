@@ -22,3 +22,8 @@
 
 **Learning:** Visible keyboard shortcut hints should not be hidden from screen readers (`aria-hidden="true"`) as they provide valuable context for interaction. Additionally, when providing temporary feedback via ARIA attributes, robustly restoring the original state (or removing the attribute if it was absent) prevents stale or invalid accessibility metadata.
 **Action:** Ensure shortcut hints are screen-reader accessible. Use a "save-and-restore" pattern for temporary attribute changes, handling the absence of the attribute explicitly.
+
+## 2026-06-16 - [Refined Dynamic Feedback & Mobile Accessibility]
+
+**Learning:** When adding qualitative feedback (like status labels), using CSS utility classes instead of inline styles is crucial for preventing state leakage. Additionally, 'inputmode="decimal"' is a low-effort, high-impact win for mobile users, providing a decimal-ready keyboard by default.
+**Action:** Always prefer class-based state management for dynamic UI updates. Include 'inputmode' on all numeric inputs to optimize the mobile experience.
