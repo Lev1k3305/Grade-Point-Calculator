@@ -61,4 +61,22 @@ describe("Grade Calculation Logic", () => {
     expect(calculateGrade("")).toBe("--");
     expect(calculateGrade(null)).toBe("--");
   });
+
+  it("updates aria-label on result element", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const res = document.getElementById("res");
+
+    scoreInput.value = "95";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(res.getAttribute("aria-label")).toBe("Grade: A plus");
+
+    scoreInput.value = "85";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(res.getAttribute("aria-label")).toBe("Grade: A");
+
+    scoreInput.value = "105";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(res.getAttribute("aria-label")).toBe("Grade: None");
+  });
 });

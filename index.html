@@ -174,6 +174,7 @@
         font-family: inherit;
         text-transform: uppercase;
         transition: all 0.3s ease;
+        min-width: 80px;
       }
       .copy-btn:hover {
         background: var(--accent);
@@ -252,6 +253,7 @@
 
       const validate = () => {
         const val = scoreInput.value;
+        const oldGrade = res.textContent;
         // Reset classes
         res.classList.remove("fail", "status-good", "status-ok", "status-fail");
         status.classList.remove(
@@ -266,7 +268,9 @@
           scoreInput.setAttribute("aria-invalid", "true");
           btn.disabled = true;
           btn.style.opacity = "0.5";
+          btn.setAttribute("title", "Input must be between 0 and 100");
           res.textContent = "--";
+          res.setAttribute("aria-label", "Grade: None");
           status.textContent = "";
           copyBtn.classList.add("hidden");
         } else {
@@ -274,9 +278,27 @@
           scoreInput.setAttribute("aria-invalid", "false");
           btn.disabled = false;
           btn.style.opacity = "1";
+          btn.removeAttribute("title");
 
           const grade = calculateGrade(val);
           res.textContent = grade;
+
+          // Accessibility: human-readable aria-label
+          const gradeLabel = grade.replace("+", " plus");
+          res.setAttribute(
+            "aria-label",
+            `Grade: ${gradeLabel === "--" ? "None" : gradeLabel}`,
+          );
+
+          if (grade !== oldGrade && grade !== "--" && res.animate) {
+            res.animate(
+              [{ transform: "scale(1.1)" }, { transform: "scale(1)" }],
+              {
+                duration: 200,
+                easing: "ease-out",
+              },
+            );
+          }
 
           let statusText = "";
           let statusClass = "";
@@ -305,8 +327,10 @@
 
           if (["A+", "A", "B", "C", "D", "F"].includes(grade)) {
             copyBtn.classList.remove("hidden");
+            copyBtn.setAttribute("aria-hidden", "false");
           } else {
             copyBtn.classList.add("hidden");
+            copyBtn.setAttribute("aria-hidden", "true");
           }
         }
       };
@@ -348,6 +372,9 @@
 
       // For testing
       window.calculateGrade = calculateGrade;
+
+      // Initialize
+      validate();
     </script>
   </body>
 </html>
