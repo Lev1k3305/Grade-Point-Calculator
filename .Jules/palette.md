@@ -27,3 +27,8 @@
 
 **Learning:** When adding qualitative feedback (like status labels), using CSS utility classes instead of inline styles is crucial for preventing state leakage. Additionally, 'inputmode="decimal"' is a low-effort, high-impact win for mobile users, providing a decimal-ready keyboard by default.
 **Action:** Always prefer class-based state management for dynamic UI updates. Include 'inputmode' on all numeric inputs to optimize the mobile experience.
+
+## 2026-06-17 - [Accessible Symbolic Results & Defensive Animations]
+
+**Learning:** Symbolic results like "A+" are often read ambiguously by screen readers. Providing a human-readable string in 'aria-label' (e.g., "Grade: A plus") ensures clarity. Furthermore, when using the Web Animations API for micro-interactions, defensive feature checks are required to prevent breakage in limited JS environments like JSDOM.
+**Action:** Use 'replace("+", " plus")' for symbolic grades in aria-labels. Always wrap 'element.animate' calls in 'if (element.animate)' checks to ensure testability and progressive enhancement.
