@@ -15,7 +15,7 @@
         --accent: #00f3ff;
         --pink: #ff0055;
         --text: #e0e0e0;
-        --dim: #707075;
+        --dim: #949498;
         --border: #1f1f23;
       }
       * {
@@ -184,14 +184,40 @@
       .copy-btn:active {
         transform: scale(0.95);
       }
+      .copy-btn:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
       .hidden {
         display: none;
+      }
+      .stability-track {
+        background: var(--border);
+        height: 2px;
+        width: 100%;
+        margin: 8px 0 15px;
+        overflow: hidden;
+      }
+      .stability-fill {
+        height: 100%;
+        width: 0;
+        background: var(--accent);
+        transition: all 0.3s ease;
+        box-shadow: 0 0 5px var(--accent);
+      }
+      .stability-fill.warn {
+        background: #f1c40f;
+        box-shadow: 0 0 5px #f1c40f;
+      }
+      .stability-fill.crit {
+        background: var(--pink);
+        box-shadow: 0 0 5px var(--pink);
       }
     </style>
   </head>
   <body>
     <main class="card">
-      <div class="header">
+      <div class="header" aria-hidden="true">
         <span>[ ID: GHOST_PROCESS ]</span><span>v1.0.4</span>
       </div>
       <h1>Grade Calculator</h1>
@@ -209,6 +235,9 @@
           autofocus
           required
         />
+        <div class="stability-track">
+          <div id="stability-bar" class="stability-fill"></div>
+        </div>
         <p id="err" class="error" role="alert"></p>
       </div>
       <button class="btn" id="btn">Calculate</button>
@@ -238,6 +267,7 @@
       const status = document.getElementById("status");
       const btn = document.getElementById("btn");
       const copyBtn = document.getElementById("copy-btn");
+      const stabilityBar = document.getElementById("stability-bar");
 
       const calculateGrade = (n) => {
         if (n === null || n === "") return "--";
@@ -273,6 +303,7 @@
           res.setAttribute("aria-label", "Grade: None");
           status.textContent = "";
           copyBtn.classList.add("hidden");
+          stabilityBar.style.width = "0%";
         } else {
           err.textContent = "";
           scoreInput.setAttribute("aria-invalid", "false");
@@ -282,6 +313,14 @@
 
           const grade = calculateGrade(val);
           res.textContent = grade;
+
+          // Stability Bar Update
+          const s = parseFloat(val) || 0;
+          stabilityBar.style.width = `${s}%`;
+          stabilityBar.classList.remove("warn", "crit");
+          if (grade === "F") stabilityBar.classList.add("crit");
+          else if (grade === "C" || grade === "D")
+            stabilityBar.classList.add("warn");
 
           // Accessibility: human-readable aria-label
           const gradeLabel = grade.replace("+", " plus");

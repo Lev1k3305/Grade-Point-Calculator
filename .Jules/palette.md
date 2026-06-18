@@ -32,3 +32,7 @@
 
 **Learning:** Symbolic results like "A+" are often read ambiguously by screen readers. Providing a human-readable string in 'aria-label' (e.g., "Grade: A plus") ensures clarity. Furthermore, when using the Web Animations API for micro-interactions, defensive feature checks are required to prevent breakage in limited JS environments like JSDOM.
 **Action:** Use 'replace("+", " plus")' for symbolic grades in aria-labels. Always wrap 'element.animate' calls in 'if (element.animate)' checks to ensure testability and progressive enhancement.
+
+## 2026-06-18 - [Thematic Visual Feedback & High-Contrast Dimming]
+**Learning:** In highly stylized "Cyberpunk" themes with very dark backgrounds, standard "dim" colors often fail WCAG contrast requirements. Additionally, a "Stability Bar" (minimalist progress bar) provides a non-intrusive, real-time visualization of data ranges that feels native to a technical interface.
+**Action:** Use #949498 as the minimum value for secondary text on #08080c backgrounds. Implement stability bars for single-metric numeric inputs to provide immediate qualitative context without additional text.
