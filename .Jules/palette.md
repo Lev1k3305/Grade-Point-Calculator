@@ -32,3 +32,8 @@
 
 **Learning:** Symbolic results like "A+" are often read ambiguously by screen readers. Providing a human-readable string in 'aria-label' (e.g., "Grade: A plus") ensures clarity. Furthermore, when using the Web Animations API for micro-interactions, defensive feature checks are required to prevent breakage in limited JS environments like JSDOM.
 **Action:** Use 'replace("+", " plus")' for symbolic grades in aria-labels. Always wrap 'element.animate' calls in 'if (element.animate)' checks to ensure testability and progressive enhancement.
+
+## 2026-06-18 - [Thematic Real-time Progress & Contrast Compliance]
+
+**Learning:** Incorporating a "Stability Bar" (progress bar) below numeric inputs provides immediate qualitative feedback that feels thematic in "Cyberpunk" designs. Additionally, maintaining a contrast ratio of at least 4.5:1 for all text (including "dim" or secondary text) is a non-negotiable accessibility requirement.
+**Action:** Use a transitioning width bar to visualize numeric input magnitude. Ensure '--dim' or secondary text colors are at least #949498 on pure black backgrounds to meet WCAG AA standards.

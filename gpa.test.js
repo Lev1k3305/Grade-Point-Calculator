@@ -79,4 +79,29 @@ describe("Grade Calculation Logic", () => {
     scoreInput.dispatchEvent(new window.Event("input"));
     expect(res.getAttribute("aria-label")).toBe("Grade: None");
   });
+
+  it("updates stability bar width and color", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const stabilityFill = document.getElementById("stability-fill");
+
+    scoreInput.value = "85";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(stabilityFill.style.width).toBe("85%");
+    expect(stabilityFill.classList.contains("stable")).toBe(true);
+
+    scoreInput.value = "55";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(stabilityFill.style.width).toBe("55%");
+    expect(stabilityFill.classList.contains("warn")).toBe(true);
+
+    scoreInput.value = "30";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(stabilityFill.style.width).toBe("30%");
+    expect(stabilityFill.classList.contains("crit")).toBe(true);
+
+    scoreInput.value = "";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(stabilityFill.style.width).toBe("0%");
+  });
 });

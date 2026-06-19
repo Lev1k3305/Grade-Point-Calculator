@@ -15,7 +15,7 @@
         --accent: #00f3ff;
         --pink: #ff0055;
         --text: #e0e0e0;
-        --dim: #707075;
+        --dim: #949498;
         --border: #1f1f23;
       }
       * {
@@ -77,6 +77,32 @@
       }
       input:invalid {
         border-color: var(--pink);
+      }
+      .stability-bar {
+        height: 4px;
+        background: var(--bg);
+        margin-bottom: 15px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+      }
+      .stability-fill {
+        height: 100%;
+        width: 0%;
+        transition:
+          width 0.3s ease,
+          background-color 0.3s ease;
+      }
+      .stability-fill.stable {
+        background: var(--accent);
+        box-shadow: 0 0 5px var(--accent);
+      }
+      .stability-fill.warn {
+        background: #f1c40f;
+        box-shadow: 0 0 5px #f1c40f;
+      }
+      .stability-fill.crit {
+        background: var(--pink);
+        box-shadow: 0 0 5px var(--pink);
       }
       .error {
         color: var(--pink);
@@ -191,7 +217,7 @@
   </head>
   <body>
     <main class="card">
-      <div class="header">
+      <div class="header" aria-hidden="true">
         <span>[ ID: GHOST_PROCESS ]</span><span>v1.0.4</span>
       </div>
       <h1>Grade Calculator</h1>
@@ -209,6 +235,9 @@
           autofocus
           required
         />
+        <div class="stability-bar" aria-hidden="true">
+          <div id="stability-fill" class="stability-fill"></div>
+        </div>
         <p id="err" class="error" role="alert"></p>
       </div>
       <button class="btn" id="btn">Calculate</button>
@@ -238,6 +267,7 @@
       const status = document.getElementById("status");
       const btn = document.getElementById("btn");
       const copyBtn = document.getElementById("copy-btn");
+      const stabilityFill = document.getElementById("stability-fill");
 
       const calculateGrade = (n) => {
         if (n === null || n === "") return "--";
@@ -262,6 +292,7 @@
           "status-fail",
           "status-dim",
         );
+        stabilityFill.classList.remove("stable", "warn", "crit");
 
         if (val !== "" && (val < 0 || val > 100)) {
           err.textContent = "SYSTEM_ERROR: Range 0-100 only";
@@ -273,6 +304,7 @@
           res.setAttribute("aria-label", "Grade: None");
           status.textContent = "";
           copyBtn.classList.add("hidden");
+          stabilityFill.style.width = "0%";
         } else {
           err.textContent = "";
           scoreInput.setAttribute("aria-invalid", "false");
@@ -282,6 +314,9 @@
 
           const grade = calculateGrade(val);
           res.textContent = grade;
+
+          // Update Stability Bar
+          stabilityFill.style.width = (val === "" ? "0" : val) + "%";
 
           // Accessibility: human-readable aria-label
           const gradeLabel = grade.replace("+", " plus");
@@ -321,6 +356,15 @@
             status.textContent = statusText;
             status.classList.add(statusClass);
             res.classList.add(statusClass);
+
+            // Stability bar color
+            if (statusClass === "status-good") {
+              stabilityFill.classList.add("stable");
+            } else if (statusClass === "status-ok") {
+              stabilityFill.classList.add("warn");
+            } else if (statusClass === "status-fail") {
+              stabilityFill.classList.add("crit");
+            }
           } else {
             status.textContent = "";
           }
