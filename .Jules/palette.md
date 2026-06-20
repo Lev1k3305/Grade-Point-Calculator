@@ -37,3 +37,8 @@
 
 **Learning:** Incorporating a "Stability Bar" (progress bar) below numeric inputs provides immediate qualitative feedback that feels thematic in "Cyberpunk" designs. Additionally, maintaining a contrast ratio of at least 4.5:1 for all text (including "dim" or secondary text) is a non-negotiable accessibility requirement.
 **Action:** Use a transitioning width bar to visualize numeric input magnitude. Ensure '--dim' or secondary text colors are at least #949498 on pure black backgrounds to meet WCAG AA standards.
+
+## 2026-06-19 - [Tactile Error Feedback & Progression Hints]
+
+**Learning:** For utility tools, non-verbal tactile feedback like a 'shake' animation provides a faster error signal than text alone. Additionally, providing 'Next Goal' hints (e.g., points remaining to next grade) gamifies the experience and gives users clear targets.
+**Action:** Use CSS-driven 'shake' animations for invalid inputs and calculate/display proximity to positive thresholds in status messages.

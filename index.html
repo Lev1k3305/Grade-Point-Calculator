@@ -213,6 +213,29 @@
       .hidden {
         display: none;
       }
+      input::-webkit-outer-spin-button,
+      input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      input[type="number"] {
+        -moz-appearance: textfield;
+      }
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-5px);
+        }
+        75% {
+          transform: translateX(5px);
+        }
+      }
+      .shake {
+        animation: shake 0.2s ease-in-out 0s 2;
+      }
     </style>
   </head>
   <body>
@@ -268,6 +291,7 @@
       const btn = document.getElementById("btn");
       const copyBtn = document.getElementById("copy-btn");
       const stabilityFill = document.getElementById("stability-fill");
+      const inputGroup = document.querySelector(".input-group");
 
       const calculateGrade = (n) => {
         if (n === null || n === "") return "--";
@@ -305,6 +329,11 @@
           status.textContent = "";
           copyBtn.classList.add("hidden");
           stabilityFill.style.width = "0%";
+
+          // Trigger shake animation
+          inputGroup.classList.remove("shake");
+          void inputGroup.offsetWidth; // Force reflow
+          inputGroup.classList.add("shake");
         } else {
           err.textContent = "";
           scoreInput.setAttribute("aria-invalid", "false");
@@ -353,7 +382,24 @@
           }
 
           if (statusClass) {
-            status.textContent = statusText;
+            // Calculate next grade hint
+            let nextHint = "";
+            const s = parseFloat(val);
+            if (!isNaN(s) && grade !== "A+") {
+              const thresholds = [
+                { limit: 50, label: "D" },
+                { limit: 60, label: "C" },
+                { limit: 70, label: "B" },
+                { limit: 80, label: "A" },
+                { limit: 90, label: "A+" },
+              ];
+              const next = thresholds.find((t) => s < t.limit);
+              if (next) {
+                nextHint = ` [ +${(next.limit - s).toFixed(0)} TO ${next.label} ]`;
+              }
+            }
+
+            status.textContent = statusText + nextHint;
             status.classList.add(statusClass);
             res.classList.add(statusClass);
 
