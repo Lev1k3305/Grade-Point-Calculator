@@ -352,10 +352,35 @@
             statusClass = "status-fail";
           }
 
-          if (statusClass) {
+          // Next Goal logic
+          const s = parseFloat(val);
+          if (!isNaN(s)) {
+            let nextGoalText = "";
+            if (s >= 90) {
+              nextGoalText = " [ MAX_LEVEL ]";
+            } else {
+              const thresholds = [
+                { limit: 50, label: "D" },
+                { limit: 60, label: "C" },
+                { limit: 70, label: "B" },
+                { limit: 80, label: "A" },
+                { limit: 90, label: "A+" },
+              ];
+              const next = thresholds.find((t) => s < t.limit);
+              if (next) {
+                const diff = (next.limit - s).toFixed(s % 1 === 0 ? 0 : 1);
+                nextGoalText = ` [ +${parseFloat(diff)} TO ${next.label} ]`;
+              }
+            }
+            statusText += nextGoalText;
+          }
+
+          if (statusClass || statusText) {
             status.textContent = statusText;
-            status.classList.add(statusClass);
-            res.classList.add(statusClass);
+            if (statusClass) {
+              status.classList.add(statusClass);
+              res.classList.add(statusClass);
+            }
 
             // Stability bar color
             if (statusClass === "status-good") {

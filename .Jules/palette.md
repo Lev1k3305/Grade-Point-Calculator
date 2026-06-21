@@ -37,3 +37,8 @@
 
 **Learning:** Incorporating a "Stability Bar" (progress bar) below numeric inputs provides immediate qualitative feedback that feels thematic in "Cyberpunk" designs. Additionally, maintaining a contrast ratio of at least 4.5:1 for all text (including "dim" or secondary text) is a non-negotiable accessibility requirement.
 **Action:** Use a transitioning width bar to visualize numeric input magnitude. Ensure '--dim' or secondary text colors are at least #949498 on pure black backgrounds to meet WCAG AA standards.
+
+## 2026-06-19 - [Progressive Goal-Oriented Feedback]
+
+**Learning:** For threshold-based inputs (like scores), providing "Next Goal" hints in status messages (e.g., `[ +5 TO A ]`) gamifies the experience and offers actionable feedback. Using dynamic precision (e.g., `.toFixed(1)`) only when necessary keeps the UI clean while remaining accurate for decimal entries.
+**Action:** Implement "Next Goal" hints for multi-tier threshold systems. Use a helper to determine the nearest upcoming threshold and display the delta clearly.
