@@ -78,6 +78,37 @@
       input:invalid {
         border-color: var(--pink);
       }
+      input::-webkit-outer-spin-button,
+      input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      input[type="number"] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+      }
+      .shake {
+        animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+      }
+      @keyframes shake {
+        10%,
+        90% {
+          transform: translate3d(-1px, 0, 0);
+        }
+        20%,
+        80% {
+          transform: translate3d(2px, 0, 0);
+        }
+        30%,
+        50%,
+        70% {
+          transform: translate3d(-4px, 0, 0);
+        }
+        40%,
+        60% {
+          transform: translate3d(4px, 0, 0);
+        }
+      }
       .stability-bar {
         height: 4px;
         background: var(--bg);
@@ -132,6 +163,11 @@
       }
       .btn:disabled {
         cursor: not-allowed;
+      }
+      .btn-locked {
+        opacity: 0.5;
+        border-color: var(--dim) !important;
+        color: var(--dim) !important;
       }
       .btn:focus-visible {
         outline: 2px solid var(--accent);
@@ -209,6 +245,10 @@
       }
       .copy-btn:active {
         transform: scale(0.95);
+      }
+      .copy-btn:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
       }
       .hidden {
         display: none;
@@ -295,10 +335,14 @@
         stabilityFill.classList.remove("stable", "warn", "crit");
 
         if (val !== "" && (val < 0 || val > 100)) {
+          if (scoreInput.getAttribute("aria-invalid") !== "true") {
+            scoreInput.classList.add("shake");
+            setTimeout(() => scoreInput.classList.remove("shake"), 400);
+          }
           err.textContent = "SYSTEM_ERROR: Range 0-100 only";
           scoreInput.setAttribute("aria-invalid", "true");
           btn.disabled = true;
-          btn.style.opacity = "0.5";
+          btn.classList.add("btn-locked");
           btn.setAttribute("title", "Input must be between 0 and 100");
           res.textContent = "--";
           res.setAttribute("aria-label", "Grade: None");
@@ -309,7 +353,7 @@
           err.textContent = "";
           scoreInput.setAttribute("aria-invalid", "false");
           btn.disabled = false;
-          btn.style.opacity = "1";
+          btn.classList.remove("btn-locked");
           btn.removeAttribute("title");
 
           const grade = calculateGrade(val);

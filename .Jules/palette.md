@@ -42,3 +42,8 @@
 
 **Learning:** For threshold-based inputs (like scores), providing "Next Goal" hints in status messages (e.g., `[ +5 TO A ]`) gamifies the experience and offers actionable feedback. Using dynamic precision (e.g., `.toFixed(1)`) only when necessary keeps the UI clean while remaining accurate for decimal entries.
 **Action:** Implement "Next Goal" hints for multi-tier threshold systems. Use a helper to determine the nearest upcoming threshold and display the delta clearly.
+
+## 2026-06-20 - [Tactile Error Feedback & Pure Aesthetic Polish]
+
+**Learning:** Tactile feedback, such as a "shake" animation on invalid input, provides a non-verbal cue that is both delightful and informative in high-theme interfaces. Furthermore, removing browser-default UI elements like numeric spin buttons ensures the custom aesthetic is uninterrupted and professional. Gating these micro-interactions with state attributes (like `aria-invalid`) prevents redundant feedback loops.
+**Action:** Use CSS keyframe animations for state transitions. Hide native input artifacts in custom-themed apps. Gate animations with existing accessibility attributes to ensure they only trigger on meaningful state changes.
