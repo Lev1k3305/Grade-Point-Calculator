@@ -104,4 +104,26 @@ describe("Grade Calculation Logic", () => {
     scoreInput.dispatchEvent(new window.Event("input"));
     expect(stabilityFill.style.width).toBe("0%");
   });
+
+  it("displays next goal hint in status message", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const status = document.getElementById("status");
+
+    scoreInput.value = "45";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(status.textContent).toContain("[ +5 TO D ]");
+
+    scoreInput.value = "85";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(status.textContent).toContain("[ +5 TO A+ ]");
+
+    scoreInput.value = "95";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(status.textContent).toContain("[ MAX_LEVEL ]");
+
+    scoreInput.value = "89.5";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(status.textContent).toContain("[ +0.5 TO A+ ]");
+  });
 });
