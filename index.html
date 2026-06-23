@@ -70,6 +70,15 @@
         font-family: inherit;
         margin-bottom: 5px;
       }
+      /* Hide spin buttons */
+      input::-webkit-outer-spin-button,
+      input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      input[type="number"] {
+        -moz-appearance: textfield;
+      }
       input:focus {
         outline: none;
         border-color: var(--accent);
@@ -132,6 +141,7 @@
       }
       .btn:disabled {
         cursor: not-allowed;
+        opacity: 0.5;
       }
       .btn:focus-visible {
         outline: 2px solid var(--accent);
@@ -269,6 +279,22 @@
       const copyBtn = document.getElementById("copy-btn");
       const stabilityFill = document.getElementById("stability-fill");
 
+      const triggerShake = (el) => {
+        if (el && el.animate) {
+          el.animate(
+            [
+              { transform: "translateX(0)" },
+              { transform: "translateX(-5px)" },
+              { transform: "translateX(5px)" },
+              { transform: "translateX(-5px)" },
+              { transform: "translateX(5px)" },
+              { transform: "translateX(0)" },
+            ],
+            { duration: 400, easing: "linear" },
+          );
+        }
+      };
+
       const calculateGrade = (n) => {
         if (n === null || n === "") return "--";
         const s = parseFloat(n);
@@ -284,6 +310,7 @@
       const validate = () => {
         const val = scoreInput.value;
         const oldGrade = res.textContent;
+        const wasInvalid = scoreInput.getAttribute("aria-invalid") === "true";
         // Reset classes
         res.classList.remove("fail", "status-good", "status-ok", "status-fail");
         status.classList.remove(
@@ -297,8 +324,8 @@
         if (val !== "" && (val < 0 || val > 100)) {
           err.textContent = "SYSTEM_ERROR: Range 0-100 only";
           scoreInput.setAttribute("aria-invalid", "true");
+          if (!wasInvalid) triggerShake(scoreInput);
           btn.disabled = true;
-          btn.style.opacity = "0.5";
           btn.setAttribute("title", "Input must be between 0 and 100");
           res.textContent = "--";
           res.setAttribute("aria-label", "Grade: None");
@@ -309,7 +336,6 @@
           err.textContent = "";
           scoreInput.setAttribute("aria-invalid", "false");
           btn.disabled = false;
-          btn.style.opacity = "1";
           btn.removeAttribute("title");
 
           const grade = calculateGrade(val);
@@ -409,7 +435,13 @@
         this.select();
       });
       scoreInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") btn.click();
+        if (e.key === "Enter") {
+          if (scoreInput.getAttribute("aria-invalid") === "true") {
+            triggerShake(scoreInput);
+          } else {
+            btn.click();
+          }
+        }
       });
 
       window.addEventListener("keydown", (e) => {
