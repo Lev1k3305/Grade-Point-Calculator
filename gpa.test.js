@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { JSDOM } from "jsdom";
 import fs from "fs";
 import path from "path";
@@ -125,5 +125,36 @@ describe("Grade Calculation Logic", () => {
     scoreInput.value = "89.5";
     scoreInput.dispatchEvent(new window.Event("input"));
     expect(status.textContent).toContain("[ +0.5 TO A+ ]");
+  });
+
+  it("triggers copy action when 'c' is pressed and input is not focused", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const copyBtn = document.getElementById("copy-btn");
+
+    // Mock clipboard
+    const writeTextMock = vi.fn().mockResolvedValue();
+    Object.defineProperty(window.navigator, "clipboard", {
+      value: { writeText: writeTextMock },
+      configurable: true,
+      writable: true,
+    });
+
+    // Set a valid score to show copy button
+    scoreInput.value = "85";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(copyBtn.classList.contains("hidden")).toBe(false);
+
+    // Focus away from input (default in JSDOM is body)
+    document.body.focus();
+
+    // Trigger 'c' keydown on window
+    const event = new window.KeyboardEvent("keydown", {
+      key: "c",
+      bubbles: true,
+    });
+    window.dispatchEvent(event);
+
+    expect(writeTextMock).toHaveBeenCalledWith("A");
   });
 });
