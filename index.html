@@ -253,6 +253,7 @@
       <button class="btn" id="btn">Calculate</button>
       <div class="shortcuts">
         <span>[ENTER] TO CALC</span>
+        <span>[C] TO COPY</span>
         <span>[ESC] TO RESET</span>
       </div>
       <div class="result" aria-live="polite" aria-atomic="true">
@@ -449,6 +450,12 @@
           scoreInput.value = "";
           validate();
           scoreInput.focus();
+        } else if (
+          e.key.toLowerCase() === "c" &&
+          document.activeElement !== scoreInput &&
+          !copyBtn.classList.contains("hidden")
+        ) {
+          copyBtn.click();
         }
       });
 
