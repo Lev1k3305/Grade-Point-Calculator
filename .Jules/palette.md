@@ -42,3 +42,7 @@
 
 **Learning:** For threshold-based inputs (like scores), providing "Next Goal" hints in status messages (e.g., `[ +5 TO A ]`) gamifies the experience and offers actionable feedback. Using dynamic precision (e.g., `.toFixed(1)`) only when necessary keeps the UI clean while remaining accurate for decimal entries.
 **Action:** Implement "Next Goal" hints for multi-tier threshold systems. Use a helper to determine the nearest upcoming threshold and display the delta clearly.
+
+## 2026-06-20 - [Tactile Error Feedback & State-Gated Animations]
+**Learning:** Providing tactile feedback (like a shake animation) both when an input transitions to an invalid state and when a user tries to interact with it while invalid (e.g., pressing 'Enter') creates a much stronger sense of boundary. Gating these animations with state checks (e.g., `wasInvalid`) prevents redundant visual noise during continuous invalid input.
+**Action:** Use 'triggerShake' for invalid state entries and failed interactions. Always track the previous valid/invalid state to gate entry animations.
