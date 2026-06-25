@@ -189,6 +189,21 @@
         letter-spacing: 1px;
         min-height: 1em;
       }
+      .goal-btn {
+        background: transparent;
+        border: none;
+        color: inherit;
+        font: inherit;
+        font-weight: bold;
+        cursor: pointer;
+        padding: 0;
+        text-transform: uppercase;
+        transition: all 0.2s ease;
+      }
+      .goal-btn:hover {
+        text-decoration: underline;
+        color: #fff;
+      }
       .res-label {
         font-size: 0.75rem;
         color: var(--dim);
@@ -252,8 +267,9 @@
       </div>
       <button class="btn" id="btn">Calculate</button>
       <div class="shortcuts">
-        <span>[ENTER] TO CALC</span>
-        <span>[ESC] TO RESET</span>
+        <span>[ENTER] CALC</span>
+        <span>[ESC] RESET</span>
+        <span>[C] COPY</span>
       </div>
       <div class="result" aria-live="polite" aria-atomic="true">
         <p class="res-label">Result // Grade:</p>
@@ -379,30 +395,44 @@
           }
 
           // Next Goal logic
+          let nextGoalText = "";
+          let nextObj = null;
           const s = parseFloat(val);
+          const thresholds = [
+            { limit: 50, label: "D" },
+            { limit: 60, label: "C" },
+            { limit: 70, label: "B" },
+            { limit: 80, label: "A" },
+            { limit: 90, label: "A+" },
+          ];
+
           if (!isNaN(s)) {
-            let nextGoalText = "";
             if (s >= 90) {
               nextGoalText = " [ MAX_LEVEL ]";
             } else {
-              const thresholds = [
-                { limit: 50, label: "D" },
-                { limit: 60, label: "C" },
-                { limit: 70, label: "B" },
-                { limit: 80, label: "A" },
-                { limit: 90, label: "A+" },
-              ];
-              const next = thresholds.find((t) => s < t.limit);
-              if (next) {
-                const diff = (next.limit - s).toFixed(s % 1 === 0 ? 0 : 1);
-                nextGoalText = ` [ +${parseFloat(diff)} TO ${next.label} ]`;
+              nextObj = thresholds.find((t) => s < t.limit);
+              if (nextObj) {
+                const diff = (nextObj.limit - s).toFixed(s % 1 === 0 ? 0 : 1);
+                nextGoalText = ` [ +${parseFloat(diff)} TO ${nextObj.label} ]`;
               }
             }
-            statusText += nextGoalText;
           }
 
           if (statusClass || statusText) {
             status.textContent = statusText;
+            if (nextObj) {
+              const btn = document.createElement("button");
+              btn.className = "goal-btn";
+              btn.dataset.target = nextObj.limit;
+              btn.setAttribute(
+                "aria-label",
+                `Set score to ${nextObj.limit} for grade ${nextObj.label}`,
+              );
+              btn.textContent = nextGoalText;
+              status.appendChild(btn);
+            } else {
+              status.textContent += nextGoalText;
+            }
             if (statusClass) {
               status.classList.add(statusClass);
               res.classList.add(statusClass);
@@ -454,12 +484,46 @@
 
       btn.addEventListener("click", validate);
 
+      window.addEventListener("keydown", (e) => {
+        if (
+          (e.key === "c" || e.key === "C") &&
+          !e.ctrlKey &&
+          !e.metaKey &&
+          document.activeElement !== scoreInput
+        ) {
+          copyBtn.click();
+        }
+      });
+
+      status.addEventListener("click", (e) => {
+        const goalBtn = e.target.closest(".goal-btn");
+        if (goalBtn) {
+          scoreInput.value = goalBtn.dataset.target;
+          validate();
+          scoreInput.focus();
+        }
+      });
+
       copyBtn.addEventListener("click", () => {
         navigator.clipboard.writeText(res.textContent).then(() => {
           const originalText = copyBtn.textContent;
           const originalAria = copyBtn.getAttribute("aria-label");
           copyBtn.textContent = "[COPIED]";
           copyBtn.setAttribute("aria-label", "Copied to clipboard");
+
+          if (res.animate) {
+            res.animate(
+              [
+                {
+                  color: "var(--accent)",
+                  textShadow: "0 0 20px var(--accent)",
+                },
+                { color: "var(--accent)" },
+              ],
+              { duration: 400, easing: "ease-out" },
+            );
+          }
+
           setTimeout(() => {
             copyBtn.textContent = originalText;
             if (originalAria) {
