@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { JSDOM } from "jsdom";
 import fs from "fs";
 import path from "path";
@@ -125,5 +125,44 @@ describe("Grade Calculation Logic", () => {
     scoreInput.value = "89.5";
     scoreInput.dispatchEvent(new window.Event("input"));
     expect(status.textContent).toContain("[ +0.5 TO A+ ]");
+  });
+
+  it("updates score when next goal button is clicked", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const status = document.getElementById("status");
+
+    scoreInput.value = "45";
+    scoreInput.dispatchEvent(new window.Event("input"));
+
+    const nextGoalBtn = status.querySelector(".status-link");
+    expect(nextGoalBtn).not.toBeNull();
+    expect(nextGoalBtn.textContent).toBe("[ +5 TO D ]");
+
+    nextGoalBtn.click();
+    expect(scoreInput.value).toBe("50");
+    expect(document.getElementById("res").textContent).toBe("D");
+  });
+
+  it("triggers copy on 'C' keydown when not focused on input", () => {
+    const { document, window: win } = window;
+    const scoreInput = document.getElementById("score");
+
+    // Mock clipboard
+    win.navigator.clipboard = {
+      writeText: vi.fn().mockResolvedValue(undefined),
+    };
+
+    // Set a grade first
+    scoreInput.value = "95";
+    scoreInput.dispatchEvent(new win.Event("input"));
+
+    // Focus away from input
+    scoreInput.blur();
+
+    const event = new win.KeyboardEvent("keydown", { key: "c" });
+    win.dispatchEvent(event);
+
+    expect(win.navigator.clipboard.writeText).toHaveBeenCalledWith("A+");
   });
 });
