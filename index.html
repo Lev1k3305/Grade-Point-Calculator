@@ -189,6 +189,20 @@
         letter-spacing: 1px;
         min-height: 1em;
       }
+      .status-link {
+        background: transparent;
+        border: none;
+        color: inherit;
+        font-family: inherit;
+        font-size: inherit;
+        font-weight: inherit;
+        text-transform: inherit;
+        letter-spacing: inherit;
+        padding: 0;
+        cursor: pointer;
+        text-decoration: underline;
+        display: inline;
+      }
       .res-label {
         font-size: 0.75rem;
         color: var(--dim);
@@ -253,6 +267,7 @@
       <button class="btn" id="btn">Calculate</button>
       <div class="shortcuts">
         <span>[ENTER] TO CALC</span>
+        <span>[C] TO COPY</span>
         <span>[ESC] TO RESET</span>
       </div>
       <div class="result" aria-live="polite" aria-atomic="true">
@@ -380,10 +395,10 @@
 
           // Next Goal logic
           const s = parseFloat(val);
+          let nextGoalBtn = null;
           if (!isNaN(s)) {
-            let nextGoalText = "";
             if (s >= 90) {
-              nextGoalText = " [ MAX_LEVEL ]";
+              statusText += " [ MAX_LEVEL ]";
             } else {
               const thresholds = [
                 { limit: 50, label: "D" },
@@ -395,14 +410,28 @@
               const next = thresholds.find((t) => s < t.limit);
               if (next) {
                 const diff = (next.limit - s).toFixed(s % 1 === 0 ? 0 : 1);
-                nextGoalText = ` [ +${parseFloat(diff)} TO ${next.label} ]`;
+                nextGoalBtn = document.createElement("button");
+                nextGoalBtn.className = "status-link";
+                nextGoalBtn.textContent = `[ +${parseFloat(diff)} TO ${next.label} ]`;
+                nextGoalBtn.setAttribute(
+                  "aria-label",
+                  `Set score to ${next.limit} to reach grade ${next.label.replace("+", " plus")}`,
+                );
+                nextGoalBtn.onclick = () => {
+                  scoreInput.value = next.limit;
+                  validate();
+                  scoreInput.focus();
+                };
               }
             }
-            statusText += nextGoalText;
           }
 
-          if (statusClass || statusText) {
+          if (statusClass || statusText || nextGoalBtn) {
             status.textContent = statusText;
+            if (nextGoalBtn) {
+              status.appendChild(document.createTextNode(" "));
+              status.appendChild(nextGoalBtn);
+            }
             if (statusClass) {
               status.classList.add(statusClass);
               res.classList.add(statusClass);
@@ -450,16 +479,41 @@
           validate();
           scoreInput.focus();
         }
+        if (
+          e.key.toLowerCase() === "c" &&
+          document.activeElement !== scoreInput &&
+          !e.ctrlKey &&
+          !e.metaKey &&
+          !e.altKey
+        ) {
+          copyBtn.click();
+        }
       });
 
       btn.addEventListener("click", validate);
 
       copyBtn.addEventListener("click", () => {
+        if (res.textContent === "--") return;
         navigator.clipboard.writeText(res.textContent).then(() => {
           const originalText = copyBtn.textContent;
           const originalAria = copyBtn.getAttribute("aria-label");
           copyBtn.textContent = "[COPIED]";
           copyBtn.setAttribute("aria-label", "Copied to clipboard");
+
+          if (res.animate) {
+            res.animate(
+              [
+                { transform: "scale(1)", textShadow: "0 0 10px var(--accent)" },
+                {
+                  transform: "scale(1.2)",
+                  textShadow: "0 0 20px var(--accent)",
+                },
+                { transform: "scale(1)", textShadow: "0 0 10px var(--accent)" },
+              ],
+              { duration: 300, easing: "ease-out" },
+            );
+          }
+
           setTimeout(() => {
             copyBtn.textContent = originalText;
             if (originalAria) {
