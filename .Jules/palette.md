@@ -44,9 +44,16 @@
 **Action:** Implement "Next Goal" hints for multi-tier threshold systems. Use a helper to determine the nearest upcoming threshold and display the delta clearly.
 
 ## 2026-06-20 - [Tactile Error Feedback & State-Gated Animations]
+
 **Learning:** Providing tactile feedback (like a shake animation) both when an input transitions to an invalid state and when a user tries to interact with it while invalid (e.g., pressing 'Enter') creates a much stronger sense of boundary. Gating these animations with state checks (e.g., `wasInvalid`) prevents redundant visual noise during continuous invalid input.
 **Action:** Use 'triggerShake' for invalid state entries and failed interactions. Always track the previous valid/invalid state to gate entry animations.
 
 ## 2026-06-21 - [Interactive Status Hints & Actionable Feedback]
+
 **Learning:** Static feedback messages (like "Next Goal" hints) are more valuable when transformed into interactive elements. Making these hints clickable allows users to instantly visualize thresholds, reducing cognitive load and interaction friction.
 **Action:** Identify static hints in calculation results and convert them into interactive buttons that programmatically update inputs to the suggested values.
+
+## 2026-06-22 - [Interactive Shortcuts & Discovery]
+
+**Learning:** Static shortcut hints (like "[ENTER] TO CALC") are missed opportunities for interaction. Transforming them into semantic buttons improves accessibility for screen readers while providing alternative click-based navigation for mouse users. Additionally, a dynamic "Next Goal" shortcut (e.g., 'G' key) reduces the friction of discovering what input is needed to reach the next success tier.
+**Action:** Convert informational shortcut text into semantic buttons with appropriate ARIA labels. Implement goal-oriented shortcuts ('G') in tiered-result applications to facilitate rapid data entry toward targets.

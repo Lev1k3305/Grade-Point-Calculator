@@ -147,7 +147,6 @@ describe("Grade Calculation Logic", () => {
   it("triggers copy on 'c' keydown", () => {
     const { document } = window;
     const scoreInput = document.getElementById("score");
-    const copyBtn = document.getElementById("copy-btn");
 
     // Mock clipboard
     window.navigator.clipboard = {
@@ -168,5 +167,73 @@ describe("Grade Calculation Logic", () => {
     const event2 = new window.KeyboardEvent("keydown", { key: "c" });
     window.dispatchEvent(event2);
     expect(window.navigator.clipboard.writeText).toHaveBeenCalledWith("A+");
+  });
+
+  it("handles interactive shortcut buttons", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const res = document.getElementById("res");
+    const calcShortcut = document.getElementById("calc-shortcut");
+    const copyShortcut = document.getElementById("copy-shortcut");
+    const resetShortcut = document.getElementById("reset-shortcut");
+
+    // Mock clipboard
+    window.navigator.clipboard = {
+      writeText: vi.fn(() => Promise.resolve()),
+    };
+
+    // Test Reset Shortcut
+    scoreInput.value = "90";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(res.textContent).toBe("A+");
+    resetShortcut.click();
+    expect(scoreInput.value).toBe("");
+    expect(res.textContent).toBe("--");
+
+    // Test Calc Shortcut
+    scoreInput.value = "80";
+    calcShortcut.click();
+    expect(res.textContent).toBe("A");
+
+    // Test Copy Shortcut
+    copyShortcut.click();
+    expect(window.navigator.clipboard.writeText).toHaveBeenCalledWith("A");
+  });
+
+  it("handles 'G' next goal shortcut", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const goalShortcut = document.getElementById("goal-shortcut");
+
+    scoreInput.value = "85";
+    scoreInput.dispatchEvent(new window.Event("input"));
+
+    // Check goal shortcut visibility
+    expect(goalShortcut.classList.contains("hidden")).toBe(false);
+
+    // Test 'G' keydown
+    scoreInput.blur();
+    const event = new window.KeyboardEvent("keydown", { key: "g" });
+    window.dispatchEvent(event);
+    expect(scoreInput.value).toBe("90");
+    expect(document.getElementById("res").textContent).toBe("A+");
+
+    // Check goal shortcut visibility at max level
+    expect(goalShortcut.classList.contains("hidden")).toBe(true);
+  });
+
+  it("updates next goal shortcut aria-label and functionality", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const goalShortcut = document.getElementById("goal-shortcut");
+
+    scoreInput.value = "75";
+    scoreInput.dispatchEvent(new window.Event("input"));
+
+    expect(goalShortcut.textContent).toContain("[G] NEXT GOAL");
+
+    goalShortcut.click();
+    expect(scoreInput.value).toBe("80");
+    expect(document.getElementById("res").textContent).toBe("A");
   });
 });

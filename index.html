@@ -151,10 +151,10 @@
         margin-top: 10px;
         display: flex;
         justify-content: space-between;
+        gap: 5px;
         font-size: 0.6rem;
         color: var(--dim);
         text-transform: uppercase;
-        pointer-events: none;
       }
       .result {
         margin-top: 25px;
@@ -236,6 +236,7 @@
       }
       .status-link:hover {
         text-decoration: underline;
+        color: var(--accent);
       }
     </style>
   </head>
@@ -266,9 +267,30 @@
       </div>
       <button class="btn" id="btn">Calculate</button>
       <div class="shortcuts">
-        <span>[ENTER] TO CALC</span>
-        <span>[C] TO COPY</span>
-        <span>[ESC] TO RESET</span>
+        <button
+          class="status-link"
+          id="calc-shortcut"
+          aria-label="Calculate grade"
+        >
+          [ENTER] TO CALC
+        </button>
+        <button class="status-link" id="copy-shortcut" aria-label="Copy grade">
+          [C] TO COPY
+        </button>
+        <button
+          class="status-link hidden"
+          id="goal-shortcut"
+          aria-label="Set to next goal"
+        >
+          [G] NEXT GOAL
+        </button>
+        <button
+          class="status-link"
+          id="reset-shortcut"
+          aria-label="Reset score"
+        >
+          [ESC] TO RESET
+        </button>
       </div>
       <div class="result" aria-live="polite" aria-atomic="true">
         <p class="res-label">Result // Grade:</p>
@@ -293,6 +315,12 @@
       const btn = document.getElementById("btn");
       const copyBtn = document.getElementById("copy-btn");
       const stabilityFill = document.getElementById("stability-fill");
+      const calcShortcut = document.getElementById("calc-shortcut");
+      const copyShortcut = document.getElementById("copy-shortcut");
+      const goalShortcut = document.getElementById("goal-shortcut");
+      const resetShortcut = document.getElementById("reset-shortcut");
+
+      let currentNextGoal = null;
 
       const triggerShake = (el) => {
         if (el && el.animate) {
@@ -396,6 +424,8 @@
           // Next Goal logic
           const s = parseFloat(val);
           let nextGoalBtn = null;
+          currentNextGoal = null;
+
           if (!isNaN(s)) {
             if (s >= 90) {
               statusText += " [ MAX_LEVEL ]";
@@ -409,16 +439,30 @@
               ];
               const next = thresholds.find((t) => s < t.limit);
               if (next) {
+                currentNextGoal = next;
                 const diff = (next.limit - s).toFixed(s % 1 === 0 ? 0 : 1);
                 nextGoalBtn = document.createElement("button");
                 nextGoalBtn.className = "status-link";
                 nextGoalBtn.textContent = ` [ +${parseFloat(diff)} TO ${next.label} ]`;
+                nextGoalBtn.setAttribute(
+                  "aria-label",
+                  `Add ${diff} points to reach grade ${next.label.replace("+", " plus")}`,
+                );
                 nextGoalBtn.onclick = () => {
                   scoreInput.value = next.limit;
                   validate();
+                  scoreInput.focus();
                 };
               }
             }
+          }
+
+          if (currentNextGoal) {
+            goalShortcut.classList.remove("hidden");
+            goalShortcut.setAttribute("aria-hidden", "false");
+          } else {
+            goalShortcut.classList.add("hidden");
+            goalShortcut.setAttribute("aria-hidden", "true");
           }
 
           if (statusClass || statusText || nextGoalBtn) {
@@ -466,20 +510,55 @@
       });
 
       window.addEventListener("keydown", (e) => {
+        const key = e.key.toLowerCase();
+        const isInputFocused = document.activeElement.tagName === "INPUT";
+
         if (e.key === "Escape") {
           scoreInput.value = "";
           validate();
           scoreInput.focus();
         } else if (
-          e.key.toLowerCase() === "c" &&
+          key === "c" &&
           !e.ctrlKey &&
           !e.metaKey &&
           !e.altKey &&
-          document.activeElement.tagName !== "INPUT" &&
+          !isInputFocused &&
           !copyBtn.classList.contains("hidden")
         ) {
           copyBtn.click();
+        } else if (
+          key === "g" &&
+          !e.ctrlKey &&
+          !e.metaKey &&
+          !e.altKey &&
+          !isInputFocused &&
+          currentNextGoal
+        ) {
+          scoreInput.value = currentNextGoal.limit;
+          validate();
+          scoreInput.focus();
         }
+      });
+
+      calcShortcut.addEventListener("click", () => {
+        btn.click();
+        scoreInput.focus();
+      });
+      copyShortcut.addEventListener("click", () => {
+        copyBtn.click();
+        scoreInput.focus();
+      });
+      goalShortcut.addEventListener("click", () => {
+        if (currentNextGoal) {
+          scoreInput.value = currentNextGoal.limit;
+          validate();
+        }
+        scoreInput.focus();
+      });
+      resetShortcut.addEventListener("click", () => {
+        scoreInput.value = "";
+        validate();
+        scoreInput.focus();
       });
 
       btn.addEventListener("click", validate);
