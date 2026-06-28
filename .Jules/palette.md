@@ -46,3 +46,7 @@
 ## 2026-06-20 - [Tactile Error Feedback & State-Gated Animations]
 **Learning:** Providing tactile feedback (like a shake animation) both when an input transitions to an invalid state and when a user tries to interact with it while invalid (e.g., pressing 'Enter') creates a much stronger sense of boundary. Gating these animations with state checks (e.g., `wasInvalid`) prevents redundant visual noise during continuous invalid input.
 **Action:** Use 'triggerShake' for invalid state entries and failed interactions. Always track the previous valid/invalid state to gate entry animations.
+
+## 2026-06-21 - [Interactive Status Hints & Actionable Feedback]
+**Learning:** Static feedback messages (like "Next Goal" hints) are more valuable when transformed into interactive elements. Making these hints clickable allows users to instantly visualize thresholds, reducing cognitive load and interaction friction.
+**Action:** Identify static hints in calculation results and convert them into interactive buttons that programmatically update inputs to the suggested values.
