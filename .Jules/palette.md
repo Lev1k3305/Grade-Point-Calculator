@@ -50,3 +50,8 @@
 ## 2026-06-21 - [Interactive Status Hints & Actionable Feedback]
 **Learning:** Static feedback messages (like "Next Goal" hints) are more valuable when transformed into interactive elements. Making these hints clickable allows users to instantly visualize thresholds, reducing cognitive load and interaction friction.
 **Action:** Identify static hints in calculation results and convert them into interactive buttons that programmatically update inputs to the suggested values.
+
+## 2026-06-22 - [Interactive Shortcut Hints & Focus Continuity]
+
+**Learning:** Static keyboard shortcut hints (like `[ENTER] TO CALC`) are more effective when they are interactive buttons themselves. This provides a clear alternative interaction path for mouse users while maintaining the "terminal" aesthetic. Furthermore, whenever a shortcut or helper button updates an input, returning focus to that input immediately is essential for a seamless keyboard-driven workflow.
+**Action:** Transform static shortcut labels into `<button class="status-link">` elements. Always follow programmatic input updates with `input.focus()` to preserve interaction flow.

@@ -112,11 +112,11 @@ describe("Grade Calculation Logic", () => {
 
     scoreInput.value = "45";
     scoreInput.dispatchEvent(new window.Event("input"));
-    expect(status.textContent).toContain("[ +5 TO D ]");
+    expect(status.textContent).toContain("[ +5 TO D (G) ]");
 
     scoreInput.value = "85";
     scoreInput.dispatchEvent(new window.Event("input"));
-    expect(status.textContent).toContain("[ +5 TO A+ ]");
+    expect(status.textContent).toContain("[ +5 TO A+ (G) ]");
 
     scoreInput.value = "95";
     scoreInput.dispatchEvent(new window.Event("input"));
@@ -124,7 +124,7 @@ describe("Grade Calculation Logic", () => {
 
     scoreInput.value = "89.5";
     scoreInput.dispatchEvent(new window.Event("input"));
-    expect(status.textContent).toContain("[ +0.5 TO A+ ]");
+    expect(status.textContent).toContain("[ +0.5 TO A+ (G) ]");
   });
 
   it("sets score when clicking next goal button", () => {
@@ -142,12 +142,42 @@ describe("Grade Calculation Logic", () => {
     nextGoalBtn.click();
     expect(scoreInput.value).toBe("90");
     expect(document.getElementById("res").textContent).toBe("A+");
+    expect(document.activeElement).toBe(scoreInput);
+  });
+
+  it("triggers next goal on 'g' keydown", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+
+    scoreInput.value = "85";
+    scoreInput.dispatchEvent(new window.Event("input"));
+
+    scoreInput.blur();
+    const event = new window.KeyboardEvent("keydown", { key: "g" });
+    window.dispatchEvent(event);
+
+    expect(scoreInput.value).toBe("90");
+    expect(document.getElementById("res").textContent).toBe("A+");
+    expect(document.activeElement).toBe(scoreInput);
+  });
+
+  it("triggers reset on shortcut button click", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const resetBtn = document.getElementById("shortcut-reset");
+
+    scoreInput.value = "85";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(scoreInput.value).toBe("85");
+
+    resetBtn.click();
+    expect(scoreInput.value).toBe("");
+    expect(document.activeElement).toBe(scoreInput);
   });
 
   it("triggers copy on 'c' keydown", () => {
     const { document } = window;
     const scoreInput = document.getElementById("score");
-    const copyBtn = document.getElementById("copy-btn");
 
     // Mock clipboard
     window.navigator.clipboard = {
