@@ -142,12 +142,57 @@ describe("Grade Calculation Logic", () => {
     nextGoalBtn.click();
     expect(scoreInput.value).toBe("90");
     expect(document.getElementById("res").textContent).toBe("A+");
+    expect(document.activeElement).toBe(scoreInput);
+  });
+
+  it("triggers next goal on 'g' keydown", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+
+    scoreInput.value = "85";
+    scoreInput.dispatchEvent(new window.Event("input"));
+
+    // Ensure it doesn't trigger if input is focused
+    scoreInput.focus();
+    const event1 = new window.KeyboardEvent("keydown", {
+      key: "g",
+      bubbles: true,
+    });
+    window.dispatchEvent(event1);
+    expect(scoreInput.value).toBe("85");
+
+    // Ensure it triggers if input is not focused
+    scoreInput.blur();
+    const event2 = new window.KeyboardEvent("keydown", {
+      key: "g",
+      bubbles: true,
+    });
+    window.dispatchEvent(event2);
+    expect(scoreInput.value).toBe("90");
+    expect(document.activeElement).toBe(scoreInput);
+  });
+
+  it("triggers actions when clicking shortcut buttons", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const shortcutCalc = document.getElementById("shortcut-calc");
+    const shortcutReset = document.getElementById("shortcut-reset");
+
+    // Test calc shortcut
+    scoreInput.value = "75";
+    shortcutCalc.click();
+    expect(document.getElementById("res").textContent).toBe("B");
+
+    // Test reset shortcut
+    shortcutReset.click();
+    expect(scoreInput.value).toBe("");
+    expect(document.getElementById("res").textContent).toBe("--");
+    expect(document.activeElement).toBe(scoreInput);
   });
 
   it("triggers copy on 'c' keydown", () => {
     const { document } = window;
     const scoreInput = document.getElementById("score");
-    const copyBtn = document.getElementById("copy-btn");
 
     // Mock clipboard
     window.navigator.clipboard = {
