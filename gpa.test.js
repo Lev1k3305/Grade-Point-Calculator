@@ -112,11 +112,11 @@ describe("Grade Calculation Logic", () => {
 
     scoreInput.value = "45";
     scoreInput.dispatchEvent(new window.Event("input"));
-    expect(status.textContent).toContain("[ +5 TO D ]");
+    expect(status.textContent).toContain("[ +5 TO D (G) ]");
 
     scoreInput.value = "85";
     scoreInput.dispatchEvent(new window.Event("input"));
-    expect(status.textContent).toContain("[ +5 TO A+ ]");
+    expect(status.textContent).toContain("[ +5 TO A+ (G) ]");
 
     scoreInput.value = "95";
     scoreInput.dispatchEvent(new window.Event("input"));
@@ -124,7 +124,7 @@ describe("Grade Calculation Logic", () => {
 
     scoreInput.value = "89.5";
     scoreInput.dispatchEvent(new window.Event("input"));
-    expect(status.textContent).toContain("[ +0.5 TO A+ ]");
+    expect(status.textContent).toContain("[ +0.5 TO A+ (G) ]");
   });
 
   it("sets score when clicking next goal button", () => {
