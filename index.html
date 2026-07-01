@@ -154,7 +154,6 @@
         font-size: 0.6rem;
         color: var(--dim);
         text-transform: uppercase;
-        pointer-events: none;
       }
       .result {
         margin-top: 25px;
@@ -266,9 +265,11 @@
       </div>
       <button class="btn" id="btn">Calculate</button>
       <div class="shortcuts">
-        <span>[ENTER] TO CALC</span>
-        <span>[C] TO COPY</span>
-        <span>[ESC] TO RESET</span>
+        <button class="status-link" id="shortcut-calc">[ENTER] TO CALC</button>
+        <button class="status-link hidden" id="shortcut-copy">
+          [C] TO COPY
+        </button>
+        <button class="status-link" id="shortcut-reset">[ESC] TO RESET</button>
       </div>
       <div class="result" aria-live="polite" aria-atomic="true">
         <p class="res-label">Result // Grade:</p>
@@ -412,10 +413,12 @@
                 const diff = (next.limit - s).toFixed(s % 1 === 0 ? 0 : 1);
                 nextGoalBtn = document.createElement("button");
                 nextGoalBtn.className = "status-link";
-                nextGoalBtn.textContent = ` [ +${parseFloat(diff)} TO ${next.label} ]`;
+                nextGoalBtn.id = "next-goal-btn";
+                nextGoalBtn.textContent = ` [ +${parseFloat(diff)} TO ${next.label} ] [G]`;
                 nextGoalBtn.onclick = () => {
                   scoreInput.value = next.limit;
                   validate();
+                  scoreInput.focus();
                 };
               }
             }
@@ -441,12 +444,15 @@
             status.textContent = "";
           }
 
+          const shortcutCopy = document.getElementById("shortcut-copy");
           if (["A+", "A", "B", "C", "D", "F"].includes(grade)) {
             copyBtn.classList.remove("hidden");
             copyBtn.setAttribute("aria-hidden", "false");
+            if (shortcutCopy) shortcutCopy.classList.remove("hidden");
           } else {
             copyBtn.classList.add("hidden");
             copyBtn.setAttribute("aria-hidden", "true");
+            if (shortcutCopy) shortcutCopy.classList.add("hidden");
           }
         }
       };
@@ -466,6 +472,7 @@
       });
 
       window.addEventListener("keydown", (e) => {
+        const isInputFocused = document.activeElement.tagName === "INPUT";
         if (e.key === "Escape") {
           scoreInput.value = "";
           validate();
@@ -475,14 +482,37 @@
           !e.ctrlKey &&
           !e.metaKey &&
           !e.altKey &&
-          document.activeElement.tagName !== "INPUT" &&
+          !isInputFocused &&
           !copyBtn.classList.contains("hidden")
         ) {
           copyBtn.click();
+        } else if (
+          e.key.toLowerCase() === "g" &&
+          !e.ctrlKey &&
+          !e.metaKey &&
+          !e.altKey &&
+          !isInputFocused
+        ) {
+          const nextGoalBtn = document.getElementById("next-goal-btn");
+          if (nextGoalBtn) nextGoalBtn.click();
         }
       });
 
       btn.addEventListener("click", validate);
+
+      document
+        .getElementById("shortcut-calc")
+        .addEventListener("click", () => btn.click());
+      document
+        .getElementById("shortcut-copy")
+        .addEventListener("click", () => copyBtn.click());
+      document
+        .getElementById("shortcut-reset")
+        .addEventListener("click", () => {
+          scoreInput.value = "";
+          validate();
+          scoreInput.focus();
+        });
 
       copyBtn.addEventListener("click", () => {
         navigator.clipboard.writeText(res.textContent).then(() => {
