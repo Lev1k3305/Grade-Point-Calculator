@@ -236,6 +236,13 @@
       .status-link:hover {
         text-decoration: underline;
       }
+      .status-link:focus-visible {
+        outline: 1px solid var(--accent);
+        outline-offset: 2px;
+      }
+      .status-link:active {
+        transform: scale(0.95);
+      }
     </style>
   </head>
   <body>
@@ -245,7 +252,9 @@
       </div>
       <h1>Grade Calculator</h1>
       <div class="input-group">
-        <label for="score">Score (0-100)</label>
+        <label for="score">
+          Score (0-100) <span style="color: var(--pink)">*</span>
+        </label>
         <input
           type="number"
           id="score"
@@ -265,11 +274,28 @@
       </div>
       <button class="btn" id="btn">Calculate</button>
       <div class="shortcuts">
-        <button class="status-link" id="shortcut-calc">[ENTER] TO CALC</button>
-        <button class="status-link hidden" id="shortcut-copy">
+        <button
+          class="status-link"
+          id="shortcut-calc"
+          aria-label="Press Enter to calculate"
+        >
+          [ENTER] TO CALC
+        </button>
+        <button
+          class="status-link hidden"
+          id="shortcut-copy"
+          aria-label="Press C to copy"
+          aria-hidden="true"
+        >
           [C] TO COPY
         </button>
-        <button class="status-link" id="shortcut-reset">[ESC] TO RESET</button>
+        <button
+          class="status-link"
+          id="shortcut-reset"
+          aria-label="Press Escape to reset"
+        >
+          [ESC] TO RESET
+        </button>
       </div>
       <div class="result" aria-live="polite" aria-atomic="true">
         <p class="res-label">Result // Grade:</p>
@@ -414,6 +440,10 @@
                 nextGoalBtn = document.createElement("button");
                 nextGoalBtn.className = "status-link";
                 nextGoalBtn.id = "next-goal-btn";
+                nextGoalBtn.setAttribute(
+                  "aria-label",
+                  `Add ${parseFloat(diff)} points to reach grade ${next.label.replace("+", " plus")}`,
+                );
                 nextGoalBtn.textContent = ` [ +${parseFloat(diff)} TO ${next.label} ] [G]`;
                 nextGoalBtn.onclick = () => {
                   scoreInput.value = next.limit;
@@ -448,11 +478,17 @@
           if (["A+", "A", "B", "C", "D", "F"].includes(grade)) {
             copyBtn.classList.remove("hidden");
             copyBtn.setAttribute("aria-hidden", "false");
-            if (shortcutCopy) shortcutCopy.classList.remove("hidden");
+            if (shortcutCopy) {
+              shortcutCopy.classList.remove("hidden");
+              shortcutCopy.setAttribute("aria-hidden", "false");
+            }
           } else {
             copyBtn.classList.add("hidden");
             copyBtn.setAttribute("aria-hidden", "true");
-            if (shortcutCopy) shortcutCopy.classList.add("hidden");
+            if (shortcutCopy) {
+              shortcutCopy.classList.add("hidden");
+              shortcutCopy.setAttribute("aria-hidden", "true");
+            }
           }
         }
       };

@@ -57,3 +57,7 @@
 
 **Learning:** Users increasingly expect visible keyboard shortcut hints (like [ENTER] TO CALC) to be actionable. Converting these hints from static text to semantic <button> elements with shared utility classes (like .status-link) provides a "double-win" for both mouse and keyboard users while improving accessibility via screen reader focusability.
 **Action:** When designing "HUD-style" interfaces with visible shortcut hints, implement them as interactive buttons by default. Always synchronize their visibility with the functional state of the actions they trigger.
+
+## 2026-06-23 - [Explicit Requirement Indicators & Accessible Shortcuts]
+**Learning:** In minimal HUD-style interfaces, explicitly marking required fields with thematic indicators (e.g., a pink asterisk) prevents user errors before they happen. Furthermore, providing descriptive 'aria-label' attributes for visible keyboard shortcut hints (like "[ENTER] TO CALC") ensures that the interface's efficiency features are discoverable for screen reader users.
+**Action:** Use thematic colors for required field indicators. Always pair visible keyboard shortcut hints with descriptive ARIA labels to explain the triggered action and the associated key.
