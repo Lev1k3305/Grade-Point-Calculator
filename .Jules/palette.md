@@ -59,5 +59,11 @@
 **Action:** When designing "HUD-style" interfaces with visible shortcut hints, implement them as interactive buttons by default. Always synchronize their visibility with the functional state of the actions they trigger.
 
 ## 2026-06-23 - [Explicit Requirement Indicators & Accessible Shortcuts]
+
 **Learning:** In minimal HUD-style interfaces, explicitly marking required fields with thematic indicators (e.g., a pink asterisk) prevents user errors before they happen. Furthermore, providing descriptive 'aria-label' attributes for visible keyboard shortcut hints (like "[ENTER] TO CALC") ensures that the interface's efficiency features are discoverable for screen reader users.
 **Action:** Use thematic colors for required field indicators. Always pair visible keyboard shortcut hints with descriptive ARIA labels to explain the triggered action and the associated key.
+
+## 2026-07-02 - [Tactile HUD Feedback & Key Discovery]
+
+**Learning:** In HUD-style interfaces, providing a visual link between physical keyboard actions and on-screen shortcut hints (via pulse animations) reinforces the user's mental model of the interface. Additionally, using `aria-keyshortcuts` on interactive hints ensures that screen reader users can discover efficiency features while navigating semantic components.
+**Action:** Use the Web Animations API to trigger "pulse" effects on shortcut hints when their respective keys are pressed. Always pair visible shortcut hints with both `aria-label` and `aria-keyshortcuts` for maximum accessibility discoverability.

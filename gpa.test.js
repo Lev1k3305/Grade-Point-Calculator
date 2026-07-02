@@ -214,4 +214,70 @@ describe("Grade Calculation Logic", () => {
     window.dispatchEvent(event2);
     expect(window.navigator.clipboard.writeText).toHaveBeenCalledWith("A+");
   });
+
+  it("triggers pulse animations on shortcut hints during keyboard interaction", () => {
+    const { document } = window;
+    const shortcutCalc = document.getElementById("shortcut-calc");
+    const shortcutReset = document.getElementById("shortcut-reset");
+    const scoreInput = document.getElementById("score");
+
+    // Mock animate
+    shortcutCalc.animate = vi.fn();
+    shortcutReset.animate = vi.fn();
+
+    // Trigger Enter (Calc)
+    scoreInput.focus();
+    const enterEvent = new window.KeyboardEvent("keydown", {
+      key: "Enter",
+      bubbles: true,
+    });
+    scoreInput.dispatchEvent(enterEvent);
+    expect(shortcutCalc.animate).toHaveBeenCalled();
+
+    // Trigger Escape (Reset)
+    const escEvent = new window.KeyboardEvent("keydown", {
+      key: "Escape",
+      bubbles: true,
+    });
+    window.dispatchEvent(escEvent);
+    expect(shortcutReset.animate).toHaveBeenCalled();
+  });
+
+  it("triggers pulse animations on 'c' and 'g' shortcuts", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+
+    // Mock clipboard for 'c' shortcut
+    window.navigator.clipboard = {
+      writeText: vi.fn(() => Promise.resolve()),
+    };
+
+    // Set value so 'C' and 'G' are available/visible
+    scoreInput.value = "85";
+    scoreInput.dispatchEvent(new window.Event("input"));
+
+    const shortcutCopy = document.getElementById("shortcut-copy");
+    const nextGoalBtn = document.getElementById("next-goal-btn");
+
+    shortcutCopy.animate = vi.fn();
+    nextGoalBtn.animate = vi.fn();
+
+    scoreInput.blur();
+
+    // Trigger 'c'
+    const cEvent = new window.KeyboardEvent("keydown", {
+      key: "c",
+      bubbles: true,
+    });
+    window.dispatchEvent(cEvent);
+    expect(shortcutCopy.animate).toHaveBeenCalled();
+
+    // Trigger 'g'
+    const gEvent = new window.KeyboardEvent("keydown", {
+      key: "g",
+      bubbles: true,
+    });
+    window.dispatchEvent(gEvent);
+    expect(nextGoalBtn.animate).toHaveBeenCalled();
+  });
 });
