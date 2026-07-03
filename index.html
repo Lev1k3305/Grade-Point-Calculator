@@ -266,14 +266,23 @@
           min="0"
           max="100"
           inputmode="decimal"
+          enterkeyhint="done"
           placeholder="e.g. 85"
           aria-describedby="err"
           aria-invalid="false"
           autofocus
           required
         />
-        <div class="stability-bar" aria-hidden="true">
-          <div id="stability-fill" class="stability-fill"></div>
+        <div class="stability-bar">
+          <div
+            id="stability-fill"
+            class="stability-fill"
+            role="progressbar"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+            aria-label="Score progress"
+          ></div>
         </div>
         <p id="err" class="error" role="alert"></p>
       </div>
@@ -404,8 +413,12 @@
           const grade = calculateGrade(val);
           res.textContent = grade;
 
+          const s = parseFloat(val);
+
           // Update Stability Bar
-          stabilityFill.style.width = (val === "" ? "0" : val) + "%";
+          const progress = val === "" ? "0" : val;
+          stabilityFill.style.width = progress + "%";
+          stabilityFill.setAttribute("aria-valuenow", progress);
 
           // Accessibility: human-readable aria-label
           const gradeLabel = grade.replace("+", " plus");
@@ -428,7 +441,10 @@
           let statusClass = "";
 
           if (grade === "A+") {
-            statusText = "EXCELLENT // DISTINCTION";
+            statusText =
+              s === 100
+                ? "PERFECT // CRITICAL_SUCCESS"
+                : "EXCELLENT // DISTINCTION";
             statusClass = "status-good";
           } else if (grade === "A" || grade === "B") {
             statusText = "GOOD // ABOVE_AVERAGE";
@@ -442,7 +458,6 @@
           }
 
           // Next Goal logic
-          const s = parseFloat(val);
           let nextGoalBtn = null;
           if (!isNaN(s)) {
             if (s >= 90) {

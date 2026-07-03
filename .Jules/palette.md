@@ -67,3 +67,13 @@
 
 **Learning:** In HUD-style interfaces, providing a visual link between physical keyboard actions and on-screen shortcut hints (via pulse animations) reinforces the user's mental model of the interface. Additionally, using `aria-keyshortcuts` on interactive hints ensures that screen reader users can discover efficiency features while navigating semantic components.
 **Action:** Use the Web Animations API to trigger "pulse" effects on shortcut hints when their respective keys are pressed. Always pair visible shortcut hints with both `aria-label` and `aria-keyshortcuts` for maximum accessibility discoverability.
+
+## 2026-07-03 - [Mobile Optimization & High-Score Delight]
+
+**Learning:** Using `enterkeyhint="done"` on the primary input field provides a clearer semantic signal to mobile users that they can finalize their entry. Additionally, adding a "critical success" status (e.g., "PERFECT // CRITICAL_SUCCESS") for maximum scores (100) rewards the user with thematic delight.
+**Action:** Always include `enterkeyhint` on main input fields. Implement "special case" status messages for boundary values to enhance thematic immersion.
+
+## 2026-07-03 - [Accessible Progress Indicators & Test Environment Stability]
+
+**Learning:** Purely visual indicators like a "Stability Bar" should be made accessible using `role="progressbar"` with dynamic `aria-valuenow` updates. Furthermore, JSDOM tests involving `localStorage` or complex events may fail with `SecurityError` due to "opaque origins" unless a valid `url` (e.g., `http://localhost`) is provided in the JSDOM constructor.
+**Action:** Implement all visual progress bars as semantic ARIA progressbars. Always provide a valid `url` in JSDOM constructor options to prevent security-related test failures in isolated environments.
