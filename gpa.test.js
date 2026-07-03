@@ -10,7 +10,11 @@ describe("Grade Calculation Logic", () => {
   let window;
 
   beforeEach(() => {
-    dom = new JSDOM(html, { runScripts: "dangerously", resources: "usable" });
+    dom = new JSDOM(html, {
+      runScripts: "dangerously",
+      resources: "usable",
+      url: "http://localhost",
+    });
     window = dom.window;
   });
 
@@ -103,6 +107,40 @@ describe("Grade Calculation Logic", () => {
     scoreInput.value = "";
     scoreInput.dispatchEvent(new window.Event("input"));
     expect(stabilityFill.style.width).toBe("0%");
+  });
+
+  it("has correct accessibility attributes on stability bar", () => {
+    const { document } = window;
+    const stabilityFill = document.getElementById("stability-fill");
+
+    expect(stabilityFill.getAttribute("role")).toBe("progressbar");
+    expect(stabilityFill.getAttribute("aria-valuemin")).toBe("0");
+    expect(stabilityFill.getAttribute("aria-valuemax")).toBe("100");
+    expect(stabilityFill.getAttribute("aria-label")).toBe("Score progress");
+  });
+
+  it("updates aria-valuenow on stability bar during input", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const stabilityFill = document.getElementById("stability-fill");
+
+    scoreInput.value = "75";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(stabilityFill.getAttribute("aria-valuenow")).toBe("75");
+
+    scoreInput.value = "100";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(stabilityFill.getAttribute("aria-valuenow")).toBe("100");
+  });
+
+  it("displays special PERFECT status for score of 100", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const status = document.getElementById("status");
+
+    scoreInput.value = "100";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(status.textContent).toContain("PERFECT // CRITICAL_SUCCESS");
   });
 
   it("displays next goal hint in status message", () => {
