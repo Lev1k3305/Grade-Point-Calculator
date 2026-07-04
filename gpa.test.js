@@ -213,16 +213,16 @@ describe("Grade Calculation Logic", () => {
   it("triggers actions when clicking shortcut buttons", () => {
     const { document } = window;
     const scoreInput = document.getElementById("score");
-    const shortcutCalc = document.getElementById("shortcut-calc");
-    const shortcutReset = document.getElementById("shortcut-reset");
+    const calcShortcut = document.getElementById("calc-shortcut");
+    const resetShortcut = document.getElementById("reset-shortcut");
 
     // Test calc shortcut
     scoreInput.value = "75";
-    shortcutCalc.click();
+    calcShortcut.click();
     expect(document.getElementById("res").textContent).toBe("B");
 
     // Test reset shortcut
-    shortcutReset.click();
+    resetShortcut.click();
     expect(scoreInput.value).toBe("");
     expect(document.getElementById("res").textContent).toBe("--");
     expect(document.activeElement).toBe(scoreInput);

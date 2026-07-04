@@ -49,5 +49,6 @@
 **Action:** Use 'triggerShake' for invalid state entries and failed interactions. Always track the previous valid/invalid state to gate entry animations.
 
 ## 2026-06-21 - [Scoped Global Shortcuts & Hint Discoverability]
+
 **Learning:** Global keyboard shortcuts (like 'C' for copy) must be gated by 'document.activeElement' to prevent collisions with text entry. Additionally, providing explicit shortcut hints in the UI (e.g., '[C] TO COPY') significantly improves feature discoverability for power users without cluttering the interface for others.
 **Action:** Always check 'document.activeElement' against input fields before triggering single-key shortcuts. Pair new shortcuts with non-intrusive UI hints.

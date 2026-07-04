@@ -305,9 +305,36 @@
       </div>
       <button class="btn" id="btn">Calculate</button>
       <div class="shortcuts">
-        <span>[ENTER] TO CALC</span>
-        <span>[C] TO COPY</span>
-        <span>[ESC] TO RESET</span>
+        <button
+          id="calc-shortcut"
+          class="status-link"
+          aria-label="Press Enter to calculate"
+        >
+          [ENTER] TO CALC
+        </button>
+        <button
+          id="copy-shortcut"
+          class="status-link hidden"
+          aria-label="Press C to copy"
+          aria-hidden="true"
+        >
+          [C] TO COPY
+        </button>
+        <button
+          id="goal-shortcut"
+          class="status-link hidden"
+          aria-label="Press G to set next goal"
+          aria-hidden="true"
+        >
+          [G] NEXT GOAL
+        </button>
+        <button
+          id="reset-shortcut"
+          class="status-link"
+          aria-label="Press Escape to reset"
+        >
+          [ESC] TO RESET
+        </button>
       </div>
       <div class="result" aria-live="polite" aria-atomic="true">
         <p class="res-label">Result // Grade:</p>
@@ -461,7 +488,6 @@
           // Next Goal logic
           let nextGoalText = "";
           let nextObj = null;
-          const s = parseFloat(val);
           const thresholds = [
             { limit: 50, label: "D" },
             { limit: 60, label: "C" },
@@ -482,6 +508,7 @@
             }
           }
 
+          currentNextGoal = nextObj;
           if (currentNextGoal) {
             goalShortcut.classList.remove("hidden");
             goalShortcut.setAttribute("aria-hidden", "false");
@@ -490,17 +517,17 @@
             goalShortcut.setAttribute("aria-hidden", "true");
           }
 
-          if (statusClass || statusText || nextGoalBtn) {
+          if (statusClass || statusText || nextObj) {
             status.textContent = statusText;
             if (nextObj) {
               const btn = document.createElement("button");
-              btn.className = "goal-btn";
+              btn.className = "goal-btn status-link";
               btn.dataset.target = nextObj.limit;
               btn.setAttribute(
                 "aria-label",
                 `Set score to ${nextObj.limit} for grade ${nextObj.label}`,
               );
-              btn.textContent = nextGoalText;
+              btn.textContent = nextGoalText + " [G]";
               status.appendChild(btn);
             } else {
               status.textContent += nextGoalText;
@@ -522,21 +549,16 @@
             status.textContent = "";
           }
 
-          const shortcutCopy = document.getElementById("shortcut-copy");
           if (["A+", "A", "B", "C", "D", "F"].includes(grade)) {
             copyBtn.classList.remove("hidden");
             copyBtn.setAttribute("aria-hidden", "false");
-            if (shortcutCopy) {
-              shortcutCopy.classList.remove("hidden");
-              shortcutCopy.setAttribute("aria-hidden", "false");
-            }
+            copyShortcut.classList.remove("hidden");
+            copyShortcut.setAttribute("aria-hidden", "false");
           } else {
             copyBtn.classList.add("hidden");
             copyBtn.setAttribute("aria-hidden", "true");
-            if (shortcutCopy) {
-              shortcutCopy.classList.add("hidden");
-              shortcutCopy.setAttribute("aria-hidden", "true");
-            }
+            copyShortcut.classList.add("hidden");
+            copyShortcut.setAttribute("aria-hidden", "true");
           }
         }
       };
@@ -550,7 +572,7 @@
           if (scoreInput.getAttribute("aria-invalid") === "true") {
             triggerShake(scoreInput);
           } else {
-            triggerPulse(document.getElementById("shortcut-calc"));
+            triggerPulse(calcShortcut);
             btn.click();
           }
         }
@@ -559,22 +581,56 @@
       window.addEventListener("keydown", (e) => {
         const key = e.key.toLowerCase();
         const isInputFocused = document.activeElement.tagName === "INPUT";
+        const hasModifiers = e.ctrlKey || e.metaKey || e.altKey;
 
         if (e.key === "Escape") {
-          const shortcutReset = document.getElementById("shortcut-reset");
-          triggerPulse(shortcutReset);
+          triggerPulse(resetShortcut);
           scoreInput.value = "";
           validate();
           scoreInput.focus();
         } else if (
-          e.key.toLowerCase() === "c" &&
-          document.activeElement !== scoreInput &&
+          key === "c" &&
+          !isInputFocused &&
+          !hasModifiers &&
           !copyBtn.classList.contains("hidden")
         ) {
+          triggerPulse(copyShortcut);
           copyBtn.click();
+        } else if (
+          key === "g" &&
+          !isInputFocused &&
+          !hasModifiers &&
+          currentNextGoal
+        ) {
+          triggerPulse(goalShortcut);
+          scoreInput.value = currentNextGoal.limit;
+          validate();
+          scoreInput.focus();
+        }
+      });
+
+      calcShortcut.addEventListener("click", () => {
+        if (scoreInput.getAttribute("aria-invalid") === "true") {
+          triggerShake(scoreInput);
+        } else {
+          btn.click();
         }
         scoreInput.focus();
       });
+
+      copyShortcut.addEventListener("click", () => {
+        copyBtn.click();
+        scoreInput.focus();
+      });
+
+      goalShortcut.addEventListener("click", () => {
+        if (currentNextGoal) {
+          scoreInput.value = currentNextGoal.limit;
+          validate();
+        }
+        scoreInput.focus();
+      });
+
       resetShortcut.addEventListener("click", () => {
         scoreInput.value = "";
         validate();
@@ -582,17 +638,6 @@
       });
 
       btn.addEventListener("click", validate);
-
-      window.addEventListener("keydown", (e) => {
-        if (
-          (e.key === "c" || e.key === "C") &&
-          !e.ctrlKey &&
-          !e.metaKey &&
-          document.activeElement !== scoreInput
-        ) {
-          copyBtn.click();
-        }
-      });
 
       status.addEventListener("click", (e) => {
         const goalBtn = e.target.closest(".goal-btn");
