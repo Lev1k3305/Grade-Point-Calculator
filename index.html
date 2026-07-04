@@ -151,10 +151,10 @@
         margin-top: 10px;
         display: flex;
         justify-content: space-between;
+        gap: 5px;
         font-size: 0.6rem;
         color: var(--dim);
         text-transform: uppercase;
-        pointer-events: none;
       }
       .result {
         margin-top: 25px;
@@ -189,6 +189,21 @@
         letter-spacing: 1px;
         min-height: 1em;
       }
+      .goal-btn {
+        background: transparent;
+        border: none;
+        color: inherit;
+        font: inherit;
+        font-weight: bold;
+        cursor: pointer;
+        padding: 0;
+        text-transform: uppercase;
+        transition: all 0.2s ease;
+      }
+      .goal-btn:hover {
+        text-decoration: underline;
+        color: #fff;
+      }
       .res-label {
         font-size: 0.75rem;
         color: var(--dim);
@@ -220,8 +235,35 @@
       .copy-btn:active {
         transform: scale(0.95);
       }
+      .copy-btn:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+        box-shadow: 0 0 10px var(--accent);
+      }
       .hidden {
         display: none;
+      }
+      .status-link {
+        background: none;
+        border: none;
+        color: inherit;
+        font: inherit;
+        text-transform: inherit;
+        cursor: pointer;
+        padding: 0;
+        text-decoration: none;
+        letter-spacing: inherit;
+      }
+      .status-link:hover {
+        text-decoration: underline;
+        color: var(--accent);
+      }
+      .status-link:focus-visible {
+        outline: 1px solid var(--accent);
+        outline-offset: 2px;
+      }
+      .status-link:active {
+        transform: scale(0.95);
       }
     </style>
   </head>
@@ -232,21 +274,32 @@
       </div>
       <h1>Grade Calculator</h1>
       <div class="input-group">
-        <label for="score">Score (0-100)</label>
+        <label for="score">
+          Score (0-100) <span style="color: var(--pink)">*</span>
+        </label>
         <input
           type="number"
           id="score"
           min="0"
           max="100"
           inputmode="decimal"
+          enterkeyhint="done"
           placeholder="e.g. 85"
           aria-describedby="err"
           aria-invalid="false"
           autofocus
           required
         />
-        <div class="stability-bar" aria-hidden="true">
-          <div id="stability-fill" class="stability-fill"></div>
+        <div class="stability-bar">
+          <div
+            id="stability-fill"
+            class="stability-fill"
+            role="progressbar"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+            aria-label="Score progress"
+          ></div>
         </div>
         <p id="err" class="error" role="alert"></p>
       </div>
@@ -279,6 +332,12 @@
       const btn = document.getElementById("btn");
       const copyBtn = document.getElementById("copy-btn");
       const stabilityFill = document.getElementById("stability-fill");
+      const calcShortcut = document.getElementById("calc-shortcut");
+      const copyShortcut = document.getElementById("copy-shortcut");
+      const goalShortcut = document.getElementById("goal-shortcut");
+      const resetShortcut = document.getElementById("reset-shortcut");
+
+      let currentNextGoal = null;
 
       const triggerShake = (el) => {
         if (el && el.animate) {
@@ -292,6 +351,19 @@
               { transform: "translateX(0)" },
             ],
             { duration: 400, easing: "linear" },
+          );
+        }
+      };
+
+      const triggerPulse = (el) => {
+        if (el && el.animate) {
+          el.animate(
+            [
+              { transform: "scale(1)", filter: "brightness(1)" },
+              { transform: "scale(1.1)", filter: "brightness(1.5)" },
+              { transform: "scale(1)", filter: "brightness(1)" },
+            ],
+            { duration: 200, easing: "ease-out" },
           );
         }
       };
@@ -342,8 +414,12 @@
           const grade = calculateGrade(val);
           res.textContent = grade;
 
+          const s = parseFloat(val);
+
           // Update Stability Bar
-          stabilityFill.style.width = (val === "" ? "0" : val) + "%";
+          const progress = val === "" ? "0" : val;
+          stabilityFill.style.width = progress + "%";
+          stabilityFill.setAttribute("aria-valuenow", progress);
 
           // Accessibility: human-readable aria-label
           const gradeLabel = grade.replace("+", " plus");
@@ -366,7 +442,10 @@
           let statusClass = "";
 
           if (grade === "A+") {
-            statusText = "EXCELLENT // DISTINCTION";
+            statusText =
+              s === 100
+                ? "PERFECT // CRITICAL_SUCCESS"
+                : "EXCELLENT // DISTINCTION";
             statusClass = "status-good";
           } else if (grade === "A" || grade === "B") {
             statusText = "GOOD // ABOVE_AVERAGE";
@@ -380,30 +459,52 @@
           }
 
           // Next Goal logic
+          let nextGoalText = "";
+          let nextObj = null;
           const s = parseFloat(val);
+          const thresholds = [
+            { limit: 50, label: "D" },
+            { limit: 60, label: "C" },
+            { limit: 70, label: "B" },
+            { limit: 80, label: "A" },
+            { limit: 90, label: "A+" },
+          ];
+
           if (!isNaN(s)) {
-            let nextGoalText = "";
             if (s >= 90) {
-              nextGoalText = " [ MAX_LEVEL ]";
+              statusText += " [ MAX_LEVEL ]";
             } else {
-              const thresholds = [
-                { limit: 50, label: "D" },
-                { limit: 60, label: "C" },
-                { limit: 70, label: "B" },
-                { limit: 80, label: "A" },
-                { limit: 90, label: "A+" },
-              ];
-              const next = thresholds.find((t) => s < t.limit);
-              if (next) {
-                const diff = (next.limit - s).toFixed(s % 1 === 0 ? 0 : 1);
-                nextGoalText = ` [ +${parseFloat(diff)} TO ${next.label} ]`;
+              nextObj = thresholds.find((t) => s < t.limit);
+              if (nextObj) {
+                const diff = (nextObj.limit - s).toFixed(s % 1 === 0 ? 0 : 1);
+                nextGoalText = ` [ +${parseFloat(diff)} TO ${nextObj.label} ]`;
               }
             }
-            statusText += nextGoalText;
           }
 
-          if (statusClass || statusText) {
+          if (currentNextGoal) {
+            goalShortcut.classList.remove("hidden");
+            goalShortcut.setAttribute("aria-hidden", "false");
+          } else {
+            goalShortcut.classList.add("hidden");
+            goalShortcut.setAttribute("aria-hidden", "true");
+          }
+
+          if (statusClass || statusText || nextGoalBtn) {
             status.textContent = statusText;
+            if (nextObj) {
+              const btn = document.createElement("button");
+              btn.className = "goal-btn";
+              btn.dataset.target = nextObj.limit;
+              btn.setAttribute(
+                "aria-label",
+                `Set score to ${nextObj.limit} for grade ${nextObj.label}`,
+              );
+              btn.textContent = nextGoalText;
+              status.appendChild(btn);
+            } else {
+              status.textContent += nextGoalText;
+            }
             if (statusClass) {
               status.classList.add(statusClass);
               res.classList.add(statusClass);
@@ -421,12 +522,21 @@
             status.textContent = "";
           }
 
+          const shortcutCopy = document.getElementById("shortcut-copy");
           if (["A+", "A", "B", "C", "D", "F"].includes(grade)) {
             copyBtn.classList.remove("hidden");
             copyBtn.setAttribute("aria-hidden", "false");
+            if (shortcutCopy) {
+              shortcutCopy.classList.remove("hidden");
+              shortcutCopy.setAttribute("aria-hidden", "false");
+            }
           } else {
             copyBtn.classList.add("hidden");
             copyBtn.setAttribute("aria-hidden", "true");
+            if (shortcutCopy) {
+              shortcutCopy.classList.add("hidden");
+              shortcutCopy.setAttribute("aria-hidden", "true");
+            }
           }
         }
       };
@@ -440,13 +550,19 @@
           if (scoreInput.getAttribute("aria-invalid") === "true") {
             triggerShake(scoreInput);
           } else {
+            triggerPulse(document.getElementById("shortcut-calc"));
             btn.click();
           }
         }
       });
 
       window.addEventListener("keydown", (e) => {
+        const key = e.key.toLowerCase();
+        const isInputFocused = document.activeElement.tagName === "INPUT";
+
         if (e.key === "Escape") {
+          const shortcutReset = document.getElementById("shortcut-reset");
+          triggerPulse(shortcutReset);
           scoreInput.value = "";
           validate();
           scoreInput.focus();
@@ -457,16 +573,74 @@
         ) {
           copyBtn.click();
         }
+        scoreInput.focus();
+      });
+      resetShortcut.addEventListener("click", () => {
+        scoreInput.value = "";
+        validate();
+        scoreInput.focus();
       });
 
       btn.addEventListener("click", validate);
 
+      window.addEventListener("keydown", (e) => {
+        if (
+          (e.key === "c" || e.key === "C") &&
+          !e.ctrlKey &&
+          !e.metaKey &&
+          document.activeElement !== scoreInput
+        ) {
+          copyBtn.click();
+        }
+      });
+
+      status.addEventListener("click", (e) => {
+        const goalBtn = e.target.closest(".goal-btn");
+        if (goalBtn) {
+          scoreInput.value = goalBtn.dataset.target;
+          validate();
+          scoreInput.focus();
+        }
+      });
+
       copyBtn.addEventListener("click", () => {
+        const isAlreadyCopied = copyBtn.textContent === "[COPIED]";
+
         navigator.clipboard.writeText(res.textContent).then(() => {
+          if (res.animate) {
+            res.animate(
+              [
+                { transform: "scale(1)", textShadow: "0 0 10px var(--accent)" },
+                {
+                  transform: "scale(1.05)",
+                  textShadow: "0 0 20px var(--accent), 0 0 30px var(--accent)",
+                },
+                { transform: "scale(1)", textShadow: "0 0 10px var(--accent)" },
+              ],
+              { duration: 300, easing: "ease-out" },
+            );
+          }
+
+          if (isAlreadyCopied) return;
+
           const originalText = copyBtn.textContent;
           const originalAria = copyBtn.getAttribute("aria-label");
           copyBtn.textContent = "[COPIED]";
           copyBtn.setAttribute("aria-label", "Copied to clipboard");
+
+          if (res.animate) {
+            res.animate(
+              [
+                {
+                  color: "var(--accent)",
+                  textShadow: "0 0 20px var(--accent)",
+                },
+                { color: "var(--accent)" },
+              ],
+              { duration: 400, easing: "ease-out" },
+            );
+          }
+
           setTimeout(() => {
             copyBtn.textContent = originalText;
             if (originalAria) {
