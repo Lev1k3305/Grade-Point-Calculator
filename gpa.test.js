@@ -10,7 +10,11 @@ describe("Grade Calculation Logic", () => {
   let window;
 
   beforeEach(() => {
-    dom = new JSDOM(html, { runScripts: "dangerously", resources: "usable" });
+    dom = new JSDOM(html, {
+      runScripts: "dangerously",
+      resources: "usable",
+      url: "http://localhost",
+    });
     window = dom.window;
   });
 
@@ -105,6 +109,40 @@ describe("Grade Calculation Logic", () => {
     expect(stabilityFill.style.width).toBe("0%");
   });
 
+  it("has correct accessibility attributes on stability bar", () => {
+    const { document } = window;
+    const stabilityFill = document.getElementById("stability-fill");
+
+    expect(stabilityFill.getAttribute("role")).toBe("progressbar");
+    expect(stabilityFill.getAttribute("aria-valuemin")).toBe("0");
+    expect(stabilityFill.getAttribute("aria-valuemax")).toBe("100");
+    expect(stabilityFill.getAttribute("aria-label")).toBe("Score progress");
+  });
+
+  it("updates aria-valuenow on stability bar during input", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const stabilityFill = document.getElementById("stability-fill");
+
+    scoreInput.value = "75";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(stabilityFill.getAttribute("aria-valuenow")).toBe("75");
+
+    scoreInput.value = "100";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(stabilityFill.getAttribute("aria-valuenow")).toBe("100");
+  });
+
+  it("displays special PERFECT status for score of 100", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const status = document.getElementById("status");
+
+    scoreInput.value = "100";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(status.textContent).toContain("PERFECT // CRITICAL_SUCCESS");
+  });
+
   it("displays next goal hint in status message", () => {
     const { document } = window;
     const scoreInput = document.getElementById("score");
@@ -112,11 +150,11 @@ describe("Grade Calculation Logic", () => {
 
     scoreInput.value = "45";
     scoreInput.dispatchEvent(new window.Event("input"));
-    expect(status.textContent).toContain("[ +5 TO D ]");
+    expect(status.textContent).toContain("[ +5 TO D ] [G]");
 
     scoreInput.value = "85";
     scoreInput.dispatchEvent(new window.Event("input"));
-    expect(status.textContent).toContain("[ +5 TO A+ ]");
+    expect(status.textContent).toContain("[ +5 TO A+ ] [G]");
 
     scoreInput.value = "95";
     scoreInput.dispatchEvent(new window.Event("input"));
@@ -124,7 +162,7 @@ describe("Grade Calculation Logic", () => {
 
     scoreInput.value = "89.5";
     scoreInput.dispatchEvent(new window.Event("input"));
-    expect(status.textContent).toContain("[ +0.5 TO A+ ]");
+    expect(status.textContent).toContain("[ +0.5 TO A+ ] [G]");
   });
 
   it("sets score when clicking next goal button", () => {
@@ -142,6 +180,52 @@ describe("Grade Calculation Logic", () => {
     nextGoalBtn.click();
     expect(scoreInput.value).toBe("90");
     expect(document.getElementById("res").textContent).toBe("A+");
+    expect(document.activeElement).toBe(scoreInput);
+  });
+
+  it("triggers next goal on 'g' keydown", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+
+    scoreInput.value = "85";
+    scoreInput.dispatchEvent(new window.Event("input"));
+
+    // Ensure it doesn't trigger if input is focused
+    scoreInput.focus();
+    const event1 = new window.KeyboardEvent("keydown", {
+      key: "g",
+      bubbles: true,
+    });
+    window.dispatchEvent(event1);
+    expect(scoreInput.value).toBe("85");
+
+    // Ensure it triggers if input is not focused
+    scoreInput.blur();
+    const event2 = new window.KeyboardEvent("keydown", {
+      key: "g",
+      bubbles: true,
+    });
+    window.dispatchEvent(event2);
+    expect(scoreInput.value).toBe("90");
+    expect(document.activeElement).toBe(scoreInput);
+  });
+
+  it("triggers actions when clicking shortcut buttons", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const shortcutCalc = document.getElementById("shortcut-calc");
+    const shortcutReset = document.getElementById("shortcut-reset");
+
+    // Test calc shortcut
+    scoreInput.value = "75";
+    shortcutCalc.click();
+    expect(document.getElementById("res").textContent).toBe("B");
+
+    // Test reset shortcut
+    shortcutReset.click();
+    expect(scoreInput.value).toBe("");
+    expect(document.getElementById("res").textContent).toBe("--");
+    expect(document.activeElement).toBe(scoreInput);
   });
 
   it("triggers copy on 'c' keydown", () => {
