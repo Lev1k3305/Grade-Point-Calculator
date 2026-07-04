@@ -151,6 +151,7 @@
         margin-top: 10px;
         display: flex;
         justify-content: space-between;
+        gap: 5px;
         font-size: 0.6rem;
         color: var(--dim);
         text-transform: uppercase;
@@ -240,6 +241,7 @@
       }
       .status-link:hover {
         text-decoration: underline;
+        color: var(--accent);
       }
       .status-link:focus-visible {
         outline: 1px solid var(--accent);
@@ -290,26 +292,25 @@
       <div class="shortcuts">
         <button
           class="status-link"
-          id="shortcut-calc"
-          aria-label="Press Enter to calculate"
-          aria-keyshortcuts="Enter"
+          id="calc-shortcut"
+          aria-label="Calculate grade"
         >
           [ENTER] TO CALC
         </button>
-        <button
-          class="status-link hidden"
-          id="shortcut-copy"
-          aria-label="Press C to copy"
-          aria-keyshortcuts="c"
-          aria-hidden="true"
-        >
+        <button class="status-link" id="copy-shortcut" aria-label="Copy grade">
           [C] TO COPY
         </button>
         <button
+          class="status-link hidden"
+          id="goal-shortcut"
+          aria-label="Set to next goal"
+        >
+          [G] NEXT GOAL
+        </button>
+        <button
           class="status-link"
-          id="shortcut-reset"
-          aria-label="Press Escape to reset"
-          aria-keyshortcuts="Escape"
+          id="reset-shortcut"
+          aria-label="Reset score"
         >
           [ESC] TO RESET
         </button>
@@ -337,6 +338,12 @@
       const btn = document.getElementById("btn");
       const copyBtn = document.getElementById("copy-btn");
       const stabilityFill = document.getElementById("stability-fill");
+      const calcShortcut = document.getElementById("calc-shortcut");
+      const copyShortcut = document.getElementById("copy-shortcut");
+      const goalShortcut = document.getElementById("goal-shortcut");
+      const resetShortcut = document.getElementById("reset-shortcut");
+
+      let currentNextGoal = null;
 
       const triggerShake = (el) => {
         if (el && el.animate) {
@@ -459,6 +466,8 @@
 
           // Next Goal logic
           let nextGoalBtn = null;
+          currentNextGoal = null;
+
           if (!isNaN(s)) {
             if (s >= 90) {
               statusText += " [ MAX_LEVEL ]";
@@ -472,16 +481,15 @@
               ];
               const next = thresholds.find((t) => s < t.limit);
               if (next) {
+                currentNextGoal = next;
                 const diff = (next.limit - s).toFixed(s % 1 === 0 ? 0 : 1);
                 nextGoalBtn = document.createElement("button");
                 nextGoalBtn.className = "status-link";
-                nextGoalBtn.id = "next-goal-btn";
+                nextGoalBtn.textContent = ` [ +${parseFloat(diff)} TO ${next.label} ]`;
                 nextGoalBtn.setAttribute(
                   "aria-label",
-                  `Add ${parseFloat(diff)} points to reach grade ${next.label.replace("+", " plus")}`,
+                  `Add ${diff} points to reach grade ${next.label.replace("+", " plus")}`,
                 );
-                nextGoalBtn.setAttribute("aria-keyshortcuts", "g");
-                nextGoalBtn.textContent = ` [ +${parseFloat(diff)} TO ${next.label} ] [G]`;
                 nextGoalBtn.onclick = () => {
                   scoreInput.value = next.limit;
                   validate();
@@ -489,6 +497,14 @@
                 };
               }
             }
+          }
+
+          if (currentNextGoal) {
+            goalShortcut.classList.remove("hidden");
+            goalShortcut.setAttribute("aria-hidden", "false");
+          } else {
+            goalShortcut.classList.add("hidden");
+            goalShortcut.setAttribute("aria-hidden", "true");
           }
 
           if (statusClass || statusText || nextGoalBtn) {
@@ -549,7 +565,9 @@
       });
 
       window.addEventListener("keydown", (e) => {
+        const key = e.key.toLowerCase();
         const isInputFocused = document.activeElement.tagName === "INPUT";
+
         if (e.key === "Escape") {
           const shortcutReset = document.getElementById("shortcut-reset");
           triggerPulse(shortcutReset);
@@ -557,7 +575,7 @@
           validate();
           scoreInput.focus();
         } else if (
-          e.key.toLowerCase() === "c" &&
+          key === "c" &&
           !e.ctrlKey &&
           !e.metaKey &&
           !e.altKey &&
@@ -568,18 +586,38 @@
           triggerPulse(shortcutCopy);
           copyBtn.click();
         } else if (
-          e.key.toLowerCase() === "g" &&
+          key === "g" &&
           !e.ctrlKey &&
           !e.metaKey &&
           !e.altKey &&
-          !isInputFocused
+          !isInputFocused &&
+          currentNextGoal
         ) {
-          const nextGoalBtn = document.getElementById("next-goal-btn");
-          if (nextGoalBtn) {
-            triggerPulse(nextGoalBtn);
-            nextGoalBtn.click();
-          }
+          scoreInput.value = currentNextGoal.limit;
+          validate();
+          scoreInput.focus();
         }
+      });
+
+      calcShortcut.addEventListener("click", () => {
+        btn.click();
+        scoreInput.focus();
+      });
+      copyShortcut.addEventListener("click", () => {
+        copyBtn.click();
+        scoreInput.focus();
+      });
+      goalShortcut.addEventListener("click", () => {
+        if (currentNextGoal) {
+          scoreInput.value = currentNextGoal.limit;
+          validate();
+        }
+        scoreInput.focus();
+      });
+      resetShortcut.addEventListener("click", () => {
+        scoreInput.value = "";
+        validate();
+        scoreInput.focus();
       });
 
       btn.addEventListener("click", validate);

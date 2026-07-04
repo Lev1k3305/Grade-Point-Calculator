@@ -53,27 +53,7 @@
 **Learning:** Static feedback messages (like "Next Goal" hints) are more valuable when transformed into interactive elements. Making these hints clickable allows users to instantly visualize thresholds, reducing cognitive load and interaction friction.
 **Action:** Identify static hints in calculation results and convert them into interactive buttons that programmatically update inputs to the suggested values.
 
-## 2026-06-22 - [Interactive Shortcut Hints & Actionable Status]
+## 2026-06-22 - [Interactive Shortcuts & Discovery]
 
-**Learning:** Users increasingly expect visible keyboard shortcut hints (like [ENTER] TO CALC) to be actionable. Converting these hints from static text to semantic <button> elements with shared utility classes (like .status-link) provides a "double-win" for both mouse and keyboard users while improving accessibility via screen reader focusability.
-**Action:** When designing "HUD-style" interfaces with visible shortcut hints, implement them as interactive buttons by default. Always synchronize their visibility with the functional state of the actions they trigger.
-
-## 2026-06-23 - [Explicit Requirement Indicators & Accessible Shortcuts]
-
-**Learning:** In minimal HUD-style interfaces, explicitly marking required fields with thematic indicators (e.g., a pink asterisk) prevents user errors before they happen. Furthermore, providing descriptive 'aria-label' attributes for visible keyboard shortcut hints (like "[ENTER] TO CALC") ensures that the interface's efficiency features are discoverable for screen reader users.
-**Action:** Use thematic colors for required field indicators. Always pair visible keyboard shortcut hints with descriptive ARIA labels to explain the triggered action and the associated key.
-
-## 2026-07-02 - [Tactile HUD Feedback & Key Discovery]
-
-**Learning:** In HUD-style interfaces, providing a visual link between physical keyboard actions and on-screen shortcut hints (via pulse animations) reinforces the user's mental model of the interface. Additionally, using `aria-keyshortcuts` on interactive hints ensures that screen reader users can discover efficiency features while navigating semantic components.
-**Action:** Use the Web Animations API to trigger "pulse" effects on shortcut hints when their respective keys are pressed. Always pair visible shortcut hints with both `aria-label` and `aria-keyshortcuts` for maximum accessibility discoverability.
-
-## 2026-07-03 - [Mobile Optimization & High-Score Delight]
-
-**Learning:** Using `enterkeyhint="done"` on the primary input field provides a clearer semantic signal to mobile users that they can finalize their entry. Additionally, adding a "critical success" status (e.g., "PERFECT // CRITICAL_SUCCESS") for maximum scores (100) rewards the user with thematic delight.
-**Action:** Always include `enterkeyhint` on main input fields. Implement "special case" status messages for boundary values to enhance thematic immersion.
-
-## 2026-07-03 - [Accessible Progress Indicators & Test Environment Stability]
-
-**Learning:** Purely visual indicators like a "Stability Bar" should be made accessible using `role="progressbar"` with dynamic `aria-valuenow` updates. Furthermore, JSDOM tests involving `localStorage` or complex events may fail with `SecurityError` due to "opaque origins" unless a valid `url` (e.g., `http://localhost`) is provided in the JSDOM constructor.
-**Action:** Implement all visual progress bars as semantic ARIA progressbars. Always provide a valid `url` in JSDOM constructor options to prevent security-related test failures in isolated environments.
+**Learning:** Static shortcut hints (like "[ENTER] TO CALC") are missed opportunities for interaction. Transforming them into semantic buttons improves accessibility for screen readers while providing alternative click-based navigation for mouse users. Additionally, a dynamic "Next Goal" shortcut (e.g., 'G' key) reduces the friction of discovering what input is needed to reach the next success tier.
+**Action:** Convert informational shortcut text into semantic buttons with appropriate ARIA labels. Implement goal-oriented shortcuts ('G') in tiered-result applications to facilitate rapid data entry toward targets.
