@@ -48,12 +48,7 @@
 **Learning:** Providing tactile feedback (like a shake animation) both when an input transitions to an invalid state and when a user tries to interact with it while invalid (e.g., pressing 'Enter') creates a much stronger sense of boundary. Gating these animations with state checks (e.g., `wasInvalid`) prevents redundant visual noise during continuous invalid input.
 **Action:** Use 'triggerShake' for invalid state entries and failed interactions. Always track the previous valid/invalid state to gate entry animations.
 
-## 2026-06-21 - [Interactive Status Hints & Actionable Feedback]
+## 2026-06-21 - [Interactive Goal-Oriented Feedback & Rapid Extraction]
 
-**Learning:** Static feedback messages (like "Next Goal" hints) are more valuable when transformed into interactive elements. Making these hints clickable allows users to instantly visualize thresholds, reducing cognitive load and interaction friction.
-**Action:** Identify static hints in calculation results and convert them into interactive buttons that programmatically update inputs to the suggested values.
-
-## 2026-06-22 - [Interactive Shortcuts & Discovery]
-
-**Learning:** Static shortcut hints (like "[ENTER] TO CALC") are missed opportunities for interaction. Transforming them into semantic buttons improves accessibility for screen readers while providing alternative click-based navigation for mouse users. Additionally, a dynamic "Next Goal" shortcut (e.g., 'G' key) reduces the friction of discovering what input is needed to reach the next success tier.
-**Action:** Convert informational shortcut text into semantic buttons with appropriate ARIA labels. Implement goal-oriented shortcuts ('G') in tiered-result applications to facilitate rapid data entry toward targets.
+**Learning:** Elevating "Next Goal" hints from static text to interactive buttons allows users to explore "what-if" scenarios instantly, making the utility feel more like a tool and less like a form. Additionally, global keyboard shortcuts (like 'C' for copy) must be carefully gated by focus state to avoid interfering with natural data entry.
+**Action:** Wrap threshold hints in interactive buttons. Implement global shortcuts with `document.activeElement` checks to prevent input field conflicts.
