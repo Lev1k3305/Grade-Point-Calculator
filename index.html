@@ -305,9 +305,9 @@
       </div>
       <button class="btn" id="btn">Calculate</button>
       <div class="shortcuts">
-        <span>[ENTER] CALC</span>
-        <span>[ESC] RESET</span>
-        <span>[C] COPY</span>
+        <span>[ENTER] TO CALC</span>
+        <span>[C] TO COPY</span>
+        <span>[ESC] TO RESET</span>
       </div>
       <div class="result" aria-live="polite" aria-atomic="true">
         <p class="res-label">Result // Grade:</p>
@@ -567,42 +567,11 @@
           validate();
           scoreInput.focus();
         } else if (
-          key === "c" &&
-          !e.ctrlKey &&
-          !e.metaKey &&
-          !e.altKey &&
-          !isInputFocused &&
+          e.key.toLowerCase() === "c" &&
+          document.activeElement !== scoreInput &&
           !copyBtn.classList.contains("hidden")
         ) {
-          const shortcutCopy = document.getElementById("shortcut-copy");
-          triggerPulse(shortcutCopy);
           copyBtn.click();
-        } else if (
-          key === "g" &&
-          !e.ctrlKey &&
-          !e.metaKey &&
-          !e.altKey &&
-          !isInputFocused &&
-          currentNextGoal
-        ) {
-          scoreInput.value = currentNextGoal.limit;
-          validate();
-          scoreInput.focus();
-        }
-      });
-
-      calcShortcut.addEventListener("click", () => {
-        btn.click();
-        scoreInput.focus();
-      });
-      copyShortcut.addEventListener("click", () => {
-        copyBtn.click();
-        scoreInput.focus();
-      });
-      goalShortcut.addEventListener("click", () => {
-        if (currentNextGoal) {
-          scoreInput.value = currentNextGoal.limit;
-          validate();
         }
         scoreInput.focus();
       });
