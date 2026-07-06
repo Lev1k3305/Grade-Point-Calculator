@@ -351,4 +351,33 @@ describe("Grade Calculation Logic", () => {
 
     expect(writeTextMock).toHaveBeenCalledWith("A");
   });
+
+  it("persists score to localStorage on input", () => {
+    const { document, localStorage } = window;
+    const scoreInput = document.getElementById("score");
+
+    scoreInput.value = "42";
+    scoreInput.dispatchEvent(new window.Event("input"));
+
+    expect(localStorage.getItem("gpa_score")).toBe("42");
+  });
+
+  it("restores score from localStorage on load", () => {
+    // Setup localStorage before creating the JSDOM instance
+    const dom = new JSDOM(html, {
+      runScripts: "dangerously",
+      resources: "usable",
+      url: "http://localhost",
+      beforeParse(window) {
+        window.localStorage.setItem("gpa_score", "88");
+      },
+    });
+
+    const { document } = dom.window;
+    const scoreInput = document.getElementById("score");
+    const res = document.getElementById("res");
+
+    expect(scoreInput.value).toBe("88");
+    expect(res.textContent).toBe("A");
+  });
 });

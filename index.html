@@ -409,6 +409,7 @@
 
       const validate = () => {
         const val = scoreInput.value;
+        localStorage.setItem("gpa_score", val);
         const oldGrade = res.textContent;
         const wasInvalid = scoreInput.getAttribute("aria-invalid") === "true";
         // Reset classes
@@ -650,17 +651,24 @@
 
       copyBtn.addEventListener("click", () => {
         const isAlreadyCopied = copyBtn.textContent === "[COPIED]";
+        const computedColor = window.getComputedStyle(res).color;
 
         navigator.clipboard.writeText(res.textContent).then(() => {
           if (res.animate) {
             res.animate(
               [
-                { transform: "scale(1)", textShadow: "0 0 10px var(--accent)" },
+                {
+                  transform: "scale(1)",
+                  textShadow: `0 0 10px ${computedColor}`,
+                },
                 {
                   transform: "scale(1.05)",
-                  textShadow: "0 0 20px var(--accent), 0 0 30px var(--accent)",
+                  textShadow: `0 0 20px ${computedColor}, 0 0 30px ${computedColor}`,
                 },
-                { transform: "scale(1)", textShadow: "0 0 10px var(--accent)" },
+                {
+                  transform: "scale(1)",
+                  textShadow: `0 0 10px ${computedColor}`,
+                },
               ],
               { duration: 300, easing: "ease-out" },
             );
@@ -677,10 +685,10 @@
             res.animate(
               [
                 {
-                  color: "var(--accent)",
-                  textShadow: "0 0 20px var(--accent)",
+                  color: computedColor,
+                  textShadow: `0 0 20px ${computedColor}`,
                 },
-                { color: "var(--accent)" },
+                { color: computedColor },
               ],
               { duration: 400, easing: "ease-out" },
             );
@@ -701,6 +709,10 @@
       window.calculateGrade = calculateGrade;
 
       // Initialize
+      const savedScore = localStorage.getItem("gpa_score");
+      if (savedScore !== null) {
+        scoreInput.value = savedScore;
+      }
       validate();
     </script>
   </body>

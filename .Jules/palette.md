@@ -52,3 +52,8 @@
 
 **Learning:** Global keyboard shortcuts (like 'C' for copy) must be gated by 'document.activeElement' to prevent collisions with text entry. Additionally, providing explicit shortcut hints in the UI (e.g., '[C] TO COPY') significantly improves feature discoverability for power users without cluttering the interface for others.
 **Action:** Always check 'document.activeElement' against input fields before triggering single-key shortcuts. Pair new shortcuts with non-intrusive UI hints.
+
+## 2026-07-05 - [Score Persistence & Thematic Visual Feedback]
+
+**Learning:** Persisting core user input in `localStorage` prevents data loss on accidental reloads, which is essential for utility tools. Furthermore, using `getComputedStyle` to drive micro-animations (like the copy pulse) ensures visual consistency by dynamically matching the animation color to the current state-based theme (e.g., matching the grade's specific color).
+**Action:** Use `localStorage` for state persistence in single-page utilities. Fetch current UI colors via `getComputedStyle` to ensure thematic micro-interactions.
