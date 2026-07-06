@@ -113,6 +113,21 @@
         background: var(--pink);
         box-shadow: 0 0 5px var(--pink);
       }
+      .perfect-glow {
+        animation: perfect-shimmer 2s infinite alternate ease-in-out;
+      }
+      @keyframes perfect-shimmer {
+        from {
+          filter: brightness(1);
+          box-shadow: 0 0 5px var(--accent);
+        }
+        to {
+          filter: brightness(1.8);
+          box-shadow:
+            0 0 20px var(--accent),
+            0 0 30px var(--accent);
+        }
+      }
       .error {
         color: var(--pink);
         font-size: 0.65rem;
@@ -282,6 +297,7 @@
           id="score"
           min="0"
           max="100"
+          step="any"
           inputmode="decimal"
           enterkeyhint="done"
           placeholder="e.g. 85"
@@ -309,6 +325,7 @@
           id="calc-shortcut"
           class="status-link"
           aria-label="Press Enter to calculate"
+          title="Press Enter to calculate"
         >
           [ENTER] TO CALC
         </button>
@@ -316,6 +333,7 @@
           id="copy-shortcut"
           class="status-link hidden"
           aria-label="Press C to copy"
+          title="Press C to copy"
           aria-hidden="true"
         >
           [C] TO COPY
@@ -324,6 +342,7 @@
           id="goal-shortcut"
           class="status-link hidden"
           aria-label="Press G to set next goal"
+          title="Press G to set next goal"
           aria-hidden="true"
         >
           [G] NEXT GOAL
@@ -332,6 +351,7 @@
           id="reset-shortcut"
           class="status-link"
           aria-label="Press Escape to reset"
+          title="Press Escape to reset"
         >
           [ESC] TO RESET
         </button>
@@ -420,7 +440,12 @@
           "status-fail",
           "status-dim",
         );
-        stabilityFill.classList.remove("stable", "warn", "crit");
+        stabilityFill.classList.remove(
+          "stable",
+          "warn",
+          "crit",
+          "perfect-glow",
+        );
 
         if (val !== "" && (val < 0 || val > 100)) {
           err.textContent = "SYSTEM_ERROR: Range 0-100 only";
@@ -430,6 +455,7 @@
           btn.setAttribute("title", "Input must be between 0 and 100");
           res.textContent = "--";
           res.setAttribute("aria-label", "Grade: None");
+          stabilityFill.removeAttribute("aria-valuetext");
           status.textContent = "";
           copyBtn.classList.add("hidden");
           stabilityFill.style.width = "0%";
@@ -451,10 +477,17 @@
 
           // Accessibility: human-readable aria-label
           const gradeLabel = grade.replace("+", " plus");
-          res.setAttribute(
-            "aria-label",
-            `Grade: ${gradeLabel === "--" ? "None" : gradeLabel}`,
-          );
+          const humanGrade = gradeLabel === "--" ? "None" : gradeLabel;
+          res.setAttribute("aria-label", `Grade: ${humanGrade}`);
+
+          if (val !== "") {
+            stabilityFill.setAttribute(
+              "aria-valuetext",
+              `Score: ${progress}%, Grade: ${humanGrade}`,
+            );
+          } else {
+            stabilityFill.removeAttribute("aria-valuetext");
+          }
 
           if (grade !== oldGrade && grade !== "--" && res.animate) {
             res.animate(
@@ -541,6 +574,9 @@
             // Stability bar color
             if (statusClass === "status-good") {
               stabilityFill.classList.add("stable");
+              if (parseFloat(val) === 100) {
+                stabilityFill.classList.add("perfect-glow");
+              }
             } else if (statusClass === "status-ok") {
               stabilityFill.classList.add("warn");
             } else if (statusClass === "status-fail") {

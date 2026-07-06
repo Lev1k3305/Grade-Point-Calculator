@@ -133,6 +133,42 @@ describe("Grade Calculation Logic", () => {
     expect(stabilityFill.getAttribute("aria-valuenow")).toBe("100");
   });
 
+  it("updates aria-valuetext on stability bar", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const stabilityFill = document.getElementById("stability-fill");
+
+    scoreInput.value = "95";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(stabilityFill.getAttribute("aria-valuetext")).toBe(
+      "Score: 95%, Grade: A plus",
+    );
+
+    scoreInput.value = "85";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(stabilityFill.getAttribute("aria-valuetext")).toBe(
+      "Score: 85%, Grade: A",
+    );
+
+    scoreInput.value = "";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(stabilityFill.hasAttribute("aria-valuetext")).toBe(false);
+  });
+
+  it("applies perfect-glow class for score of 100", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const stabilityFill = document.getElementById("stability-fill");
+
+    scoreInput.value = "100";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(stabilityFill.classList.contains("perfect-glow")).toBe(true);
+
+    scoreInput.value = "99";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(stabilityFill.classList.contains("perfect-glow")).toBe(false);
+  });
+
   it("displays special PERFECT status for score of 100", () => {
     const { document } = window;
     const scoreInput = document.getElementById("score");
