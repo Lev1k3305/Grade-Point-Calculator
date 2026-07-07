@@ -57,3 +57,8 @@
 
 **Learning:** Persisting core user input in `localStorage` prevents data loss on accidental reloads, which is essential for utility tools. Furthermore, using `getComputedStyle` to drive micro-animations (like the copy pulse) ensures visual consistency by dynamically matching the animation color to the current state-based theme (e.g., matching the grade's specific color).
 **Action:** Use `localStorage` for state persistence in single-page utilities. Fetch current UI colors via `getComputedStyle` to ensure thematic micro-interactions.
+
+## 2026-07-06 - [Rich Progress Context & Precision Discoverability]
+
+**Learning:** Providing `aria-valuetext` on progress bars (e.g., "Score: 95%, Grade: A plus") significantly improves the context for screen reader users beyond simple percentages. Additionally, adding `step="any"` to numeric inputs and using `title` attributes for keyboard hints on interactive shortcuts balances precision with discoverability.
+**Action:** Always set `aria-valuetext` for non-linear progress bars. Use `step="any"` for decimal-capable inputs and add `title` tooltips to reinforce keyboard shortcut hints.
