@@ -62,3 +62,8 @@
 
 **Learning:** Providing `aria-valuetext` on progress bars (e.g., "Score: 95%, Grade: A plus") significantly improves the context for screen reader users beyond simple percentages. Additionally, adding `step="any"` to numeric inputs and using `title` attributes for keyboard hints on interactive shortcuts balances precision with discoverability.
 **Action:** Always set `aria-valuetext` for non-linear progress bars. Use `step="any"` for decimal-capable inputs and add `title` tooltips to reinforce keyboard shortcut hints.
+
+## 2026-07-07 - [Informative Landmarks & Qualitative ARIA Context]
+
+**Learning:** Visual threshold markers on progress bars provide critical landmarks for users aiming for specific tiers. Implementing these via a CSS pseudo-element (`::after`) with a `linear-gradient` keeps the HTML clean and doesn't interfere with the `transition` of the fill element. Additionally, appending the qualitative status (e.g., "EXCELLENT") in parentheses to the `aria-valuetext` provides a much richer, context-aware experience for screen reader users than numerical data alone.
+**Action:** For multi-tier progress bars, use `linear-gradient` markers for visual milestones and include qualitative status descriptions in `aria-valuetext` to bridge the gap between quantitative data and human-meaningful results.
