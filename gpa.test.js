@@ -141,13 +141,13 @@ describe("Grade Calculation Logic", () => {
     scoreInput.value = "95";
     scoreInput.dispatchEvent(new window.Event("input"));
     expect(stabilityFill.getAttribute("aria-valuetext")).toBe(
-      "Score: 95%, Grade: A plus",
+      "Score: 95%, Grade: A plus (EXCELLENT // DISTINCTION)",
     );
 
     scoreInput.value = "85";
     scoreInput.dispatchEvent(new window.Event("input"));
     expect(stabilityFill.getAttribute("aria-valuetext")).toBe(
-      "Score: 85%, Grade: A",
+      "Score: 85%, Grade: A (GOOD // ABOVE_AVERAGE)",
     );
 
     scoreInput.value = "";
