@@ -416,4 +416,43 @@ describe("Grade Calculation Logic", () => {
     expect(scoreInput.value).toBe("88");
     expect(res.textContent).toBe("A");
   });
+
+  it("updates score when next goal button is clicked", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const status = document.getElementById("status");
+
+    scoreInput.value = "45";
+    scoreInput.dispatchEvent(new window.Event("input"));
+
+    const nextGoalBtn = status.querySelector(".status-link");
+    expect(nextGoalBtn).not.toBeNull();
+    expect(nextGoalBtn.textContent).toBe("[ +5 TO D ]");
+
+    nextGoalBtn.click();
+    expect(scoreInput.value).toBe("50");
+    expect(document.getElementById("res").textContent).toBe("D");
+  });
+
+  it("triggers copy on 'C' keydown when not focused on input", () => {
+    const { document, window: win } = window;
+    const scoreInput = document.getElementById("score");
+
+    // Mock clipboard
+    win.navigator.clipboard = {
+      writeText: vi.fn().mockResolvedValue(undefined),
+    };
+
+    // Set a grade first
+    scoreInput.value = "95";
+    scoreInput.dispatchEvent(new win.Event("input"));
+
+    // Focus away from input
+    scoreInput.blur();
+
+    const event = new win.KeyboardEvent("keydown", { key: "c" });
+    win.dispatchEvent(event);
+
+    expect(win.navigator.clipboard.writeText).toHaveBeenCalledWith("A+");
+  });
 });

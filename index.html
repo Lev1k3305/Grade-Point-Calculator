@@ -237,20 +237,19 @@
         letter-spacing: 1px;
         min-height: 1em;
       }
-      .goal-btn {
+      .status-link {
         background: transparent;
         border: none;
         color: inherit;
-        font: inherit;
-        font-weight: bold;
-        cursor: pointer;
+        font-family: inherit;
+        font-size: inherit;
+        font-weight: inherit;
+        text-transform: inherit;
+        letter-spacing: inherit;
         padding: 0;
-        text-transform: uppercase;
-        transition: all 0.2s ease;
-      }
-      .goal-btn:hover {
+        cursor: pointer;
         text-decoration: underline;
-        color: #fff;
+        display: inline;
       }
       .res-label {
         font-size: 0.75rem;
@@ -354,40 +353,9 @@
       </div>
       <button class="btn" id="btn">Calculate</button>
       <div class="shortcuts">
-        <button
-          id="calc-shortcut"
-          class="status-link"
-          aria-label="Press Enter to calculate"
-          title="Press Enter to calculate"
-        >
-          [ENTER] TO CALC
-        </button>
-        <button
-          id="copy-shortcut"
-          class="status-link hidden"
-          aria-label="Press C to copy"
-          title="Press C to copy"
-          aria-hidden="true"
-        >
-          [C] TO COPY
-        </button>
-        <button
-          id="goal-shortcut"
-          class="status-link hidden"
-          aria-label="Press G to set next goal"
-          title="Press G to set next goal"
-          aria-hidden="true"
-        >
-          [G] NEXT GOAL
-        </button>
-        <button
-          id="reset-shortcut"
-          class="status-link"
-          aria-label="Press Escape to reset"
-          title="Press Escape to reset"
-        >
-          [ESC] TO RESET
-        </button>
+        <span>[ENTER] TO CALC</span>
+        <span>[C] TO COPY</span>
+        <span>[ESC] TO RESET</span>
       </div>
       <div class="result" aria-live="polite" aria-atomic="true">
         <p class="res-label">Result // Grade:</p>
@@ -544,61 +512,43 @@
           }
 
           // Next Goal logic
-          let nextGoalText = "";
-          let nextObj = null;
-          const thresholds = [
-            { limit: 50, label: "D" },
-            { limit: 60, label: "C" },
-            { limit: 70, label: "B" },
-            { limit: 80, label: "A" },
-            { limit: 90, label: "A+" },
-          ];
-
+          const s = parseFloat(val);
+          let nextGoalBtn = null;
           if (!isNaN(s)) {
             if (s >= 90) {
               statusText += " [ MAX_LEVEL ]";
             } else {
-              nextObj = thresholds.find((t) => s < t.limit);
-              if (nextObj) {
-                const diff = (nextObj.limit - s).toFixed(s % 1 === 0 ? 0 : 1);
-                nextGoalText = ` [ +${parseFloat(diff)} TO ${nextObj.label} ]`;
+              const thresholds = [
+                { limit: 50, label: "D" },
+                { limit: 60, label: "C" },
+                { limit: 70, label: "B" },
+                { limit: 80, label: "A" },
+                { limit: 90, label: "A+" },
+              ];
+              const next = thresholds.find((t) => s < t.limit);
+              if (next) {
+                const diff = (next.limit - s).toFixed(s % 1 === 0 ? 0 : 1);
+                nextGoalBtn = document.createElement("button");
+                nextGoalBtn.className = "status-link";
+                nextGoalBtn.textContent = `[ +${parseFloat(diff)} TO ${next.label} ]`;
+                nextGoalBtn.setAttribute(
+                  "aria-label",
+                  `Set score to ${next.limit} to reach grade ${next.label.replace("+", " plus")}`,
+                );
+                nextGoalBtn.onclick = () => {
+                  scoreInput.value = next.limit;
+                  validate();
+                  scoreInput.focus();
+                };
               }
             }
           }
 
-          currentNextGoal = nextObj;
-          if (currentNextGoal) {
-            goalShortcut.classList.remove("hidden");
-            goalShortcut.setAttribute("aria-hidden", "false");
-          } else {
-            goalShortcut.classList.add("hidden");
-            goalShortcut.setAttribute("aria-hidden", "true");
-          }
-
-          if (val !== "") {
-            let valuetext = `Score: ${progress}%, Grade: ${humanGrade}`;
-            if (statusText) {
-              valuetext += ` (${statusText.split(" [")[0]})`;
-            }
-            stabilityFill.setAttribute("aria-valuetext", valuetext);
-          } else {
-            stabilityFill.removeAttribute("aria-valuetext");
-          }
-
-          if (statusClass || statusText || nextObj) {
+          if (statusClass || statusText || nextGoalBtn) {
             status.textContent = statusText;
-            if (nextObj) {
-              const btn = document.createElement("button");
-              btn.className = "goal-btn status-link";
-              btn.dataset.target = nextObj.limit;
-              btn.setAttribute(
-                "aria-label",
-                `Set score to ${nextObj.limit} for grade ${nextObj.label}`,
-              );
-              btn.textContent = nextGoalText + " [G]";
-              status.appendChild(btn);
-            } else {
-              status.textContent += nextGoalText;
+            if (nextGoalBtn) {
+              status.appendChild(document.createTextNode(" "));
+              status.appendChild(nextGoalBtn);
             }
             if (statusClass) {
               status.classList.add(statusClass);
@@ -699,13 +649,15 @@
           scoreInput.value = currentNextGoal.limit;
           validate();
         }
-        scoreInput.focus();
-      });
-
-      resetShortcut.addEventListener("click", () => {
-        scoreInput.value = "";
-        validate();
-        scoreInput.focus();
+        if (
+          e.key.toLowerCase() === "c" &&
+          document.activeElement !== scoreInput &&
+          !e.ctrlKey &&
+          !e.metaKey &&
+          !e.altKey
+        ) {
+          copyBtn.click();
+        }
       });
 
       btn.addEventListener("click", validate);
@@ -720,9 +672,7 @@
       });
 
       copyBtn.addEventListener("click", () => {
-        const isAlreadyCopied = copyBtn.textContent === "[COPIED]";
-        const computedColor = window.getComputedStyle(res).color;
-
+        if (res.textContent === "--") return;
         navigator.clipboard.writeText(res.textContent).then(() => {
           if (res.animate) {
             res.animate(
@@ -754,13 +704,14 @@
           if (res.animate) {
             res.animate(
               [
+                { transform: "scale(1)", textShadow: "0 0 10px var(--accent)" },
                 {
-                  color: computedColor,
-                  textShadow: `0 0 20px ${computedColor}`,
+                  transform: "scale(1.2)",
+                  textShadow: "0 0 20px var(--accent)",
                 },
-                { color: computedColor },
+                { transform: "scale(1)", textShadow: "0 0 10px var(--accent)" },
               ],
-              { duration: 400, easing: "ease-out" },
+              { duration: 300, easing: "ease-out" },
             );
           }
 
