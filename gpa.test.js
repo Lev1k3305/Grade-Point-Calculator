@@ -10,7 +10,11 @@ describe("Grade Calculation Logic", () => {
   let window;
 
   beforeEach(() => {
-    dom = new JSDOM(html, { runScripts: "dangerously", resources: "usable" });
+    dom = new JSDOM(html, {
+      runScripts: "dangerously",
+      resources: "usable",
+      url: "http://localhost",
+    });
     window = dom.window;
   });
 
@@ -105,6 +109,76 @@ describe("Grade Calculation Logic", () => {
     expect(stabilityFill.style.width).toBe("0%");
   });
 
+  it("has correct accessibility attributes on stability bar", () => {
+    const { document } = window;
+    const stabilityFill = document.getElementById("stability-fill");
+
+    expect(stabilityFill.getAttribute("role")).toBe("progressbar");
+    expect(stabilityFill.getAttribute("aria-valuemin")).toBe("0");
+    expect(stabilityFill.getAttribute("aria-valuemax")).toBe("100");
+    expect(stabilityFill.getAttribute("aria-label")).toBe("Score progress");
+  });
+
+  it("updates aria-valuenow on stability bar during input", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const stabilityFill = document.getElementById("stability-fill");
+
+    scoreInput.value = "75";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(stabilityFill.getAttribute("aria-valuenow")).toBe("75");
+
+    scoreInput.value = "100";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(stabilityFill.getAttribute("aria-valuenow")).toBe("100");
+  });
+
+  it("updates aria-valuetext on stability bar", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const stabilityFill = document.getElementById("stability-fill");
+
+    scoreInput.value = "95";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(stabilityFill.getAttribute("aria-valuetext")).toBe(
+      "Score: 95%, Grade: A plus (EXCELLENT // DISTINCTION)",
+    );
+
+    scoreInput.value = "85";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(stabilityFill.getAttribute("aria-valuetext")).toBe(
+      "Score: 85%, Grade: A (GOOD // ABOVE_AVERAGE)",
+    );
+
+    scoreInput.value = "";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(stabilityFill.hasAttribute("aria-valuetext")).toBe(false);
+  });
+
+  it("applies perfect-glow class for score of 100", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const stabilityFill = document.getElementById("stability-fill");
+
+    scoreInput.value = "100";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(stabilityFill.classList.contains("perfect-glow")).toBe(true);
+
+    scoreInput.value = "99";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(stabilityFill.classList.contains("perfect-glow")).toBe(false);
+  });
+
+  it("displays special PERFECT status for score of 100", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const status = document.getElementById("status");
+
+    scoreInput.value = "100";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(status.textContent).toContain("PERFECT // CRITICAL_SUCCESS");
+  });
+
   it("displays next goal hint in status message", () => {
     const { document } = window;
     const scoreInput = document.getElementById("score");
@@ -112,11 +186,11 @@ describe("Grade Calculation Logic", () => {
 
     scoreInput.value = "45";
     scoreInput.dispatchEvent(new window.Event("input"));
-    expect(status.textContent).toContain("[ +5 TO D ]");
+    expect(status.textContent).toContain("[ +5 TO D ] [G]");
 
     scoreInput.value = "85";
     scoreInput.dispatchEvent(new window.Event("input"));
-    expect(status.textContent).toContain("[ +5 TO A+ ]");
+    expect(status.textContent).toContain("[ +5 TO A+ ] [G]");
 
     scoreInput.value = "95";
     scoreInput.dispatchEvent(new window.Event("input"));
@@ -124,7 +198,223 @@ describe("Grade Calculation Logic", () => {
 
     scoreInput.value = "89.5";
     scoreInput.dispatchEvent(new window.Event("input"));
-    expect(status.textContent).toContain("[ +0.5 TO A+ ]");
+    expect(status.textContent).toContain("[ +0.5 TO A+ ] [G]");
+  });
+
+  it("sets score when clicking next goal button", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const status = document.getElementById("status");
+
+    scoreInput.value = "85";
+    scoreInput.dispatchEvent(new window.Event("input"));
+
+    const nextGoalBtn = status.querySelector(".status-link");
+    expect(nextGoalBtn).not.toBeNull();
+    expect(nextGoalBtn.textContent).toContain("A+");
+
+    nextGoalBtn.click();
+    expect(scoreInput.value).toBe("90");
+    expect(document.getElementById("res").textContent).toBe("A+");
+    expect(document.activeElement).toBe(scoreInput);
+  });
+
+  it("triggers next goal on 'g' keydown", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+
+    scoreInput.value = "85";
+    scoreInput.dispatchEvent(new window.Event("input"));
+
+    // Ensure it doesn't trigger if input is focused
+    scoreInput.focus();
+    const event1 = new window.KeyboardEvent("keydown", {
+      key: "g",
+      bubbles: true,
+    });
+    window.dispatchEvent(event1);
+    expect(scoreInput.value).toBe("85");
+
+    // Ensure it triggers if input is not focused
+    scoreInput.blur();
+    const event2 = new window.KeyboardEvent("keydown", {
+      key: "g",
+      bubbles: true,
+    });
+    window.dispatchEvent(event2);
+    expect(scoreInput.value).toBe("90");
+    expect(document.activeElement).toBe(scoreInput);
+  });
+
+  it("triggers actions when clicking shortcut buttons", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const calcShortcut = document.getElementById("calc-shortcut");
+    const resetShortcut = document.getElementById("reset-shortcut");
+
+    // Test calc shortcut
+    scoreInput.value = "75";
+    calcShortcut.click();
+    expect(document.getElementById("res").textContent).toBe("B");
+
+    // Test reset shortcut
+    resetShortcut.click();
+    expect(scoreInput.value).toBe("");
+    expect(document.getElementById("res").textContent).toBe("--");
+    expect(document.activeElement).toBe(scoreInput);
+  });
+
+  it("triggers copy on 'c' keydown", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+
+    // Mock clipboard
+    window.navigator.clipboard = {
+      writeText: vi.fn(() => Promise.resolve()),
+    };
+
+    scoreInput.value = "90";
+    scoreInput.dispatchEvent(new window.Event("input"));
+
+    // Ensure it doesn't trigger if input is focused
+    scoreInput.focus();
+    const event1 = new window.KeyboardEvent("keydown", { key: "c" });
+    window.dispatchEvent(event1);
+    expect(window.navigator.clipboard.writeText).not.toHaveBeenCalled();
+
+    // Ensure it triggers if input is not focused
+    scoreInput.blur();
+    const event2 = new window.KeyboardEvent("keydown", { key: "c" });
+    window.dispatchEvent(event2);
+    expect(window.navigator.clipboard.writeText).toHaveBeenCalledWith("A+");
+  });
+
+  it("handles interactive shortcut buttons", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const res = document.getElementById("res");
+    const calcShortcut = document.getElementById("calc-shortcut");
+    const copyShortcut = document.getElementById("copy-shortcut");
+    const resetShortcut = document.getElementById("reset-shortcut");
+
+    // Mock clipboard
+    window.navigator.clipboard = {
+      writeText: vi.fn(() => Promise.resolve()),
+    };
+
+    // Test Reset Shortcut
+    scoreInput.value = "90";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(res.textContent).toBe("A+");
+    resetShortcut.click();
+    expect(scoreInput.value).toBe("");
+    expect(res.textContent).toBe("--");
+
+    // Test Calc Shortcut
+    scoreInput.value = "80";
+    calcShortcut.click();
+    expect(res.textContent).toBe("A");
+
+    // Test Copy Shortcut
+    copyShortcut.click();
+    expect(window.navigator.clipboard.writeText).toHaveBeenCalledWith("A");
+  });
+
+  it("handles 'G' next goal shortcut", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const goalShortcut = document.getElementById("goal-shortcut");
+
+    scoreInput.value = "85";
+    scoreInput.dispatchEvent(new window.Event("input"));
+
+    // Check goal shortcut visibility
+    expect(goalShortcut.classList.contains("hidden")).toBe(false);
+
+    // Test 'G' keydown
+    scoreInput.blur();
+    const event = new window.KeyboardEvent("keydown", { key: "g" });
+    window.dispatchEvent(event);
+    expect(scoreInput.value).toBe("90");
+    expect(document.getElementById("res").textContent).toBe("A+");
+
+    // Check goal shortcut visibility at max level
+    expect(goalShortcut.classList.contains("hidden")).toBe(true);
+  });
+
+  it("updates next goal shortcut aria-label and functionality", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const goalShortcut = document.getElementById("goal-shortcut");
+
+    scoreInput.value = "75";
+    scoreInput.dispatchEvent(new window.Event("input"));
+
+    expect(goalShortcut.textContent).toContain("[G] NEXT GOAL");
+
+    goalShortcut.click();
+    expect(scoreInput.value).toBe("80");
+    expect(document.getElementById("res").textContent).toBe("A");
+  });
+
+  it("triggers copy action when 'c' is pressed and input is not focused", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const copyBtn = document.getElementById("copy-btn");
+
+    // Mock clipboard
+    const writeTextMock = vi.fn().mockResolvedValue();
+    Object.defineProperty(window.navigator, "clipboard", {
+      value: { writeText: writeTextMock },
+      configurable: true,
+      writable: true,
+    });
+
+    // Set a valid score to show copy button
+    scoreInput.value = "85";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(copyBtn.classList.contains("hidden")).toBe(false);
+
+    // Focus away from input (default in JSDOM is body)
+    document.body.focus();
+
+    // Trigger 'c' keydown on window
+    const event = new window.KeyboardEvent("keydown", {
+      key: "c",
+      bubbles: true,
+    });
+    window.dispatchEvent(event);
+
+    expect(writeTextMock).toHaveBeenCalledWith("A");
+  });
+
+  it("persists score to localStorage on input", () => {
+    const { document, localStorage } = window;
+    const scoreInput = document.getElementById("score");
+
+    scoreInput.value = "42";
+    scoreInput.dispatchEvent(new window.Event("input"));
+
+    expect(localStorage.getItem("gpa_score")).toBe("42");
+  });
+
+  it("restores score from localStorage on load", () => {
+    // Setup localStorage before creating the JSDOM instance
+    const dom = new JSDOM(html, {
+      runScripts: "dangerously",
+      resources: "usable",
+      url: "http://localhost",
+      beforeParse(window) {
+        window.localStorage.setItem("gpa_score", "88");
+      },
+    });
+
+    const { document } = dom.window;
+    const scoreInput = document.getElementById("score");
+    const res = document.getElementById("res");
+
+    expect(scoreInput.value).toBe("88");
+    expect(res.textContent).toBe("A");
   });
 
   it("updates score when next goal button is clicked", () => {

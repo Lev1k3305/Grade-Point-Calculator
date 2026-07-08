@@ -88,11 +88,44 @@
         border-color: var(--pink);
       }
       .stability-bar {
-        height: 4px;
+        height: 6px;
         background: var(--bg);
         margin-bottom: 15px;
         border: 1px solid var(--border);
         overflow: hidden;
+        position: relative;
+      }
+      .stability-bar::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          to right,
+          transparent 49.5%,
+          var(--border) 49.5%,
+          var(--border) 50.5%,
+          transparent 50.5%,
+          transparent 59.5%,
+          var(--border) 59.5%,
+          var(--border) 60.5%,
+          transparent 60.5%,
+          transparent 69.5%,
+          var(--border) 69.5%,
+          var(--border) 70.5%,
+          transparent 70.5%,
+          transparent 79.5%,
+          var(--border) 79.5%,
+          var(--border) 80.5%,
+          transparent 80.5%,
+          transparent 89.5%,
+          var(--border) 89.5%,
+          var(--border) 90.5%,
+          transparent 90.5%
+        );
+        pointer-events: none;
       }
       .stability-fill {
         height: 100%;
@@ -112,6 +145,21 @@
       .stability-fill.crit {
         background: var(--pink);
         box-shadow: 0 0 5px var(--pink);
+      }
+      .perfect-glow {
+        animation: perfect-shimmer 2s infinite alternate ease-in-out;
+      }
+      @keyframes perfect-shimmer {
+        from {
+          filter: brightness(1);
+          box-shadow: 0 0 5px var(--accent);
+        }
+        to {
+          filter: brightness(1.8);
+          box-shadow:
+            0 0 20px var(--accent),
+            0 0 30px var(--accent);
+        }
       }
       .error {
         color: var(--pink);
@@ -151,10 +199,10 @@
         margin-top: 10px;
         display: flex;
         justify-content: space-between;
+        gap: 5px;
         font-size: 0.6rem;
         color: var(--dim);
         text-transform: uppercase;
-        pointer-events: none;
       }
       .result {
         margin-top: 25px;
@@ -234,8 +282,35 @@
       .copy-btn:active {
         transform: scale(0.95);
       }
+      .copy-btn:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+        box-shadow: 0 0 10px var(--accent);
+      }
       .hidden {
         display: none;
+      }
+      .status-link {
+        background: none;
+        border: none;
+        color: inherit;
+        font: inherit;
+        text-transform: inherit;
+        cursor: pointer;
+        padding: 0;
+        text-decoration: none;
+        letter-spacing: inherit;
+      }
+      .status-link:hover {
+        text-decoration: underline;
+        color: var(--accent);
+      }
+      .status-link:focus-visible {
+        outline: 1px solid var(--accent);
+        outline-offset: 2px;
+      }
+      .status-link:active {
+        transform: scale(0.95);
       }
     </style>
   </head>
@@ -246,21 +321,33 @@
       </div>
       <h1>Grade Calculator</h1>
       <div class="input-group">
-        <label for="score">Score (0-100)</label>
+        <label for="score">
+          Score (0-100) <span style="color: var(--pink)">*</span>
+        </label>
         <input
           type="number"
           id="score"
           min="0"
           max="100"
+          step="any"
           inputmode="decimal"
+          enterkeyhint="done"
           placeholder="e.g. 85"
           aria-describedby="err"
           aria-invalid="false"
           autofocus
           required
         />
-        <div class="stability-bar" aria-hidden="true">
-          <div id="stability-fill" class="stability-fill"></div>
+        <div class="stability-bar">
+          <div
+            id="stability-fill"
+            class="stability-fill"
+            role="progressbar"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+            aria-label="Score progress"
+          ></div>
         </div>
         <p id="err" class="error" role="alert"></p>
       </div>
@@ -293,6 +380,12 @@
       const btn = document.getElementById("btn");
       const copyBtn = document.getElementById("copy-btn");
       const stabilityFill = document.getElementById("stability-fill");
+      const calcShortcut = document.getElementById("calc-shortcut");
+      const copyShortcut = document.getElementById("copy-shortcut");
+      const goalShortcut = document.getElementById("goal-shortcut");
+      const resetShortcut = document.getElementById("reset-shortcut");
+
+      let currentNextGoal = null;
 
       const triggerShake = (el) => {
         if (el && el.animate) {
@@ -306,6 +399,19 @@
               { transform: "translateX(0)" },
             ],
             { duration: 400, easing: "linear" },
+          );
+        }
+      };
+
+      const triggerPulse = (el) => {
+        if (el && el.animate) {
+          el.animate(
+            [
+              { transform: "scale(1)", filter: "brightness(1)" },
+              { transform: "scale(1.1)", filter: "brightness(1.5)" },
+              { transform: "scale(1)", filter: "brightness(1)" },
+            ],
+            { duration: 200, easing: "ease-out" },
           );
         }
       };
@@ -324,6 +430,7 @@
 
       const validate = () => {
         const val = scoreInput.value;
+        localStorage.setItem("gpa_score", val);
         const oldGrade = res.textContent;
         const wasInvalid = scoreInput.getAttribute("aria-invalid") === "true";
         // Reset classes
@@ -334,7 +441,12 @@
           "status-fail",
           "status-dim",
         );
-        stabilityFill.classList.remove("stable", "warn", "crit");
+        stabilityFill.classList.remove(
+          "stable",
+          "warn",
+          "crit",
+          "perfect-glow",
+        );
 
         if (val !== "" && (val < 0 || val > 100)) {
           err.textContent = "SYSTEM_ERROR: Range 0-100 only";
@@ -344,6 +456,7 @@
           btn.setAttribute("title", "Input must be between 0 and 100");
           res.textContent = "--";
           res.setAttribute("aria-label", "Grade: None");
+          stabilityFill.removeAttribute("aria-valuetext");
           status.textContent = "";
           copyBtn.classList.add("hidden");
           stabilityFill.style.width = "0%";
@@ -356,15 +469,17 @@
           const grade = calculateGrade(val);
           res.textContent = grade;
 
+          const s = parseFloat(val);
+
           // Update Stability Bar
-          stabilityFill.style.width = (val === "" ? "0" : val) + "%";
+          const progress = val === "" ? "0" : val;
+          stabilityFill.style.width = progress + "%";
+          stabilityFill.setAttribute("aria-valuenow", progress);
 
           // Accessibility: human-readable aria-label
           const gradeLabel = grade.replace("+", " plus");
-          res.setAttribute(
-            "aria-label",
-            `Grade: ${gradeLabel === "--" ? "None" : gradeLabel}`,
-          );
+          const humanGrade = gradeLabel === "--" ? "None" : gradeLabel;
+          res.setAttribute("aria-label", `Grade: ${humanGrade}`);
 
           if (grade !== oldGrade && grade !== "--" && res.animate) {
             res.animate(
@@ -380,7 +495,10 @@
           let statusClass = "";
 
           if (grade === "A+") {
-            statusText = "EXCELLENT // DISTINCTION";
+            statusText =
+              s === 100
+                ? "PERFECT // CRITICAL_SUCCESS"
+                : "EXCELLENT // DISTINCTION";
             statusClass = "status-good";
           } else if (grade === "A" || grade === "B") {
             statusText = "GOOD // ABOVE_AVERAGE";
@@ -440,6 +558,9 @@
             // Stability bar color
             if (statusClass === "status-good") {
               stabilityFill.classList.add("stable");
+              if (parseFloat(val) === 100) {
+                stabilityFill.classList.add("perfect-glow");
+              }
             } else if (statusClass === "status-ok") {
               stabilityFill.classList.add("warn");
             } else if (statusClass === "status-fail") {
@@ -452,9 +573,13 @@
           if (["A+", "A", "B", "C", "D", "F"].includes(grade)) {
             copyBtn.classList.remove("hidden");
             copyBtn.setAttribute("aria-hidden", "false");
+            copyShortcut.classList.remove("hidden");
+            copyShortcut.setAttribute("aria-hidden", "false");
           } else {
             copyBtn.classList.add("hidden");
             copyBtn.setAttribute("aria-hidden", "true");
+            copyShortcut.classList.add("hidden");
+            copyShortcut.setAttribute("aria-hidden", "true");
           }
         }
       };
@@ -468,16 +593,61 @@
           if (scoreInput.getAttribute("aria-invalid") === "true") {
             triggerShake(scoreInput);
           } else {
+            triggerPulse(calcShortcut);
             btn.click();
           }
         }
       });
 
       window.addEventListener("keydown", (e) => {
+        const key = e.key.toLowerCase();
+        const isInputFocused = document.activeElement.tagName === "INPUT";
+        const hasModifiers = e.ctrlKey || e.metaKey || e.altKey;
+
         if (e.key === "Escape") {
+          triggerPulse(resetShortcut);
           scoreInput.value = "";
           validate();
           scoreInput.focus();
+        } else if (
+          key === "c" &&
+          !isInputFocused &&
+          !hasModifiers &&
+          !copyBtn.classList.contains("hidden")
+        ) {
+          triggerPulse(copyShortcut);
+          copyBtn.click();
+        } else if (
+          key === "g" &&
+          !isInputFocused &&
+          !hasModifiers &&
+          currentNextGoal
+        ) {
+          triggerPulse(goalShortcut);
+          scoreInput.value = currentNextGoal.limit;
+          validate();
+          scoreInput.focus();
+        }
+      });
+
+      calcShortcut.addEventListener("click", () => {
+        if (scoreInput.getAttribute("aria-invalid") === "true") {
+          triggerShake(scoreInput);
+        } else {
+          btn.click();
+        }
+        scoreInput.focus();
+      });
+
+      copyShortcut.addEventListener("click", () => {
+        copyBtn.click();
+        scoreInput.focus();
+      });
+
+      goalShortcut.addEventListener("click", () => {
+        if (currentNextGoal) {
+          scoreInput.value = currentNextGoal.limit;
+          validate();
         }
         if (
           e.key.toLowerCase() === "c" &&
@@ -492,9 +662,40 @@
 
       btn.addEventListener("click", validate);
 
+      status.addEventListener("click", (e) => {
+        const goalBtn = e.target.closest(".goal-btn");
+        if (goalBtn) {
+          scoreInput.value = goalBtn.dataset.target;
+          validate();
+          scoreInput.focus();
+        }
+      });
+
       copyBtn.addEventListener("click", () => {
         if (res.textContent === "--") return;
         navigator.clipboard.writeText(res.textContent).then(() => {
+          if (res.animate) {
+            res.animate(
+              [
+                {
+                  transform: "scale(1)",
+                  textShadow: `0 0 10px ${computedColor}`,
+                },
+                {
+                  transform: "scale(1.05)",
+                  textShadow: `0 0 20px ${computedColor}, 0 0 30px ${computedColor}`,
+                },
+                {
+                  transform: "scale(1)",
+                  textShadow: `0 0 10px ${computedColor}`,
+                },
+              ],
+              { duration: 300, easing: "ease-out" },
+            );
+          }
+
+          if (isAlreadyCopied) return;
+
           const originalText = copyBtn.textContent;
           const originalAria = copyBtn.getAttribute("aria-label");
           copyBtn.textContent = "[COPIED]";
@@ -529,6 +730,10 @@
       window.calculateGrade = calculateGrade;
 
       // Initialize
+      const savedScore = localStorage.getItem("gpa_score");
+      if (savedScore !== null) {
+        scoreInput.value = savedScore;
+      }
       validate();
     </script>
   </body>
