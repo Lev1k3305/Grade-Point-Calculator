@@ -353,9 +353,38 @@
       </div>
       <button class="btn" id="btn">Calculate</button>
       <div class="shortcuts">
-        <span>[ENTER] TO CALC</span>
-        <span>[C] TO COPY</span>
-        <span>[ESC] TO RESET</span>
+        <button
+          id="calc-shortcut"
+          class="status-link"
+          aria-label="Calculate grade"
+          title="Press Enter to calculate"
+        >
+          [ENTER] TO CALC
+        </button>
+        <button
+          id="copy-shortcut"
+          class="status-link hidden"
+          aria-label="Copy grade to clipboard"
+          title="Press C to copy"
+        >
+          [C] TO COPY
+        </button>
+        <button
+          id="goal-shortcut"
+          class="status-link hidden"
+          aria-label="Set next goal score"
+          title="Press G to set next goal"
+        >
+          [G] NEXT GOAL
+        </button>
+        <button
+          id="reset-shortcut"
+          class="status-link"
+          aria-label="Reset calculator"
+          title="Press Escape to reset"
+        >
+          [ESC] TO RESET
+        </button>
       </div>
       <div class="result" aria-live="polite" aria-atomic="true">
         <p class="res-label">Result // Grade:</p>
@@ -468,7 +497,6 @@
 
           const grade = calculateGrade(val);
           res.textContent = grade;
-
           const s = parseFloat(val);
 
           // Update Stability Bar
@@ -512,8 +540,8 @@
           }
 
           // Next Goal logic
-          const s = parseFloat(val);
           let nextGoalBtn = null;
+          currentNextGoal = null;
           if (!isNaN(s)) {
             if (s >= 90) {
               statusText += " [ MAX_LEVEL ]";
@@ -527,6 +555,7 @@
               ];
               const next = thresholds.find((t) => s < t.limit);
               if (next) {
+                currentNextGoal = next;
                 const diff = (next.limit - s).toFixed(s % 1 === 0 ? 0 : 1);
                 nextGoalBtn = document.createElement("button");
                 nextGoalBtn.className = "status-link";
@@ -545,10 +574,20 @@
           }
 
           if (statusClass || statusText || nextGoalBtn) {
+            if (val !== "") {
+              stabilityFill.setAttribute(
+                "aria-valuetext",
+                `Score: ${val}%, Grade: ${gradeLabel} (${statusText.split(" [")[0]})`,
+              );
+            } else {
+              stabilityFill.removeAttribute("aria-valuetext");
+            }
+
             status.textContent = statusText;
             if (nextGoalBtn) {
               status.appendChild(document.createTextNode(" "));
               status.appendChild(nextGoalBtn);
+              status.appendChild(document.createTextNode(" [G]"));
             }
             if (statusClass) {
               status.classList.add(statusClass);
@@ -568,6 +607,7 @@
             }
           } else {
             status.textContent = "";
+            stabilityFill.removeAttribute("aria-valuetext");
           }
 
           if (["A+", "A", "B", "C", "D", "F"].includes(grade)) {
@@ -580,6 +620,14 @@
             copyBtn.setAttribute("aria-hidden", "true");
             copyShortcut.classList.add("hidden");
             copyShortcut.setAttribute("aria-hidden", "true");
+          }
+
+          if (currentNextGoal) {
+            goalShortcut.classList.remove("hidden");
+            goalShortcut.setAttribute("aria-hidden", "false");
+          } else {
+            goalShortcut.classList.add("hidden");
+            goalShortcut.setAttribute("aria-hidden", "true");
           }
         }
       };
@@ -648,15 +696,7 @@
         if (currentNextGoal) {
           scoreInput.value = currentNextGoal.limit;
           validate();
-        }
-        if (
-          e.key.toLowerCase() === "c" &&
-          document.activeElement !== scoreInput &&
-          !e.ctrlKey &&
-          !e.metaKey &&
-          !e.altKey
-        ) {
-          copyBtn.click();
+          scoreInput.focus();
         }
       });
 
@@ -673,6 +713,9 @@
 
       copyBtn.addEventListener("click", () => {
         if (res.textContent === "--") return;
+        const computedColor = window.getComputedStyle(res).color;
+        const isAlreadyCopied = copyBtn.textContent === "[COPIED]";
+
         navigator.clipboard.writeText(res.textContent).then(() => {
           if (res.animate) {
             res.animate(
@@ -724,6 +767,14 @@
             }
           }, 1500);
         });
+      });
+
+      // For testing
+      resetShortcut.addEventListener("click", () => {
+        triggerPulse(resetShortcut);
+        scoreInput.value = "";
+        validate();
+        scoreInput.focus();
       });
 
       // For testing
