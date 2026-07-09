@@ -52,3 +52,8 @@
 
 **Learning:** Making "Next Goal" hints interactive transforms static information into a powerful shortcut for exploration. Additionally, pairing background actions (like Copy) with transient pulse animations provides a high-confidence, delightful confirmation that bridges the gap between digital action and physical perception.
 **Action:** Always look for ways to make qualitative status messages actionable. Use scale pulse animations to confirm successful background operations.
+
+## 2026-06-22 - [Semantic Shortcut Buttons & Robust State Toggling]
+
+**Learning:** Replacing static text hints with semantic `<button>` elements for keyboard shortcuts improves accessibility and discoverability. Explicitly synchronizing their visibility and functional state (e.g., toggling '.hidden') with the primary actions they trigger ensures a consistent and non-confusing user experience.
+**Action:** Implement visible shortcut hints as semantic buttons. Ensure their visibility state is always synchronized with the availability of the associated action.

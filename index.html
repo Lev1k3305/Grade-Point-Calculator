@@ -353,9 +353,38 @@
       </div>
       <button class="btn" id="btn">Calculate</button>
       <div class="shortcuts">
-        <span>[ENTER] TO CALC</span>
-        <span>[C] TO COPY</span>
-        <span>[ESC] TO RESET</span>
+        <button
+          id="calc-shortcut"
+          class="status-link"
+          aria-label="Press Enter to calculate"
+          title="Press Enter to calculate"
+        >
+          [ENTER] TO CALC
+        </button>
+        <button
+          id="copy-shortcut"
+          class="status-link hidden"
+          aria-label="Press C to copy grade"
+          title="Press C to copy grade"
+        >
+          [C] TO COPY
+        </button>
+        <button
+          id="goal-shortcut"
+          class="status-link hidden"
+          aria-label="Press G to reach next goal"
+          title="Press G to reach next goal"
+        >
+          [G] NEXT GOAL
+        </button>
+        <button
+          id="reset-shortcut"
+          class="status-link"
+          aria-label="Press Escape to reset"
+          title="Press Escape to reset"
+        >
+          [ESC] TO RESET
+        </button>
       </div>
       <div class="result" aria-live="polite" aria-atomic="true">
         <p class="res-label">Result // Grade:</p>
@@ -386,6 +415,7 @@
       const resetShortcut = document.getElementById("reset-shortcut");
 
       let currentNextGoal = null;
+      let isAlreadyCopied = false;
 
       const triggerShake = (el) => {
         if (el && el.animate) {
@@ -512,8 +542,8 @@
           }
 
           // Next Goal logic
-          const s = parseFloat(val);
           let nextGoalBtn = null;
+          currentNextGoal = null;
           if (!isNaN(s)) {
             if (s >= 90) {
               statusText += " [ MAX_LEVEL ]";
@@ -527,6 +557,7 @@
               ];
               const next = thresholds.find((t) => s < t.limit);
               if (next) {
+                currentNextGoal = next;
                 const diff = (next.limit - s).toFixed(s % 1 === 0 ? 0 : 1);
                 nextGoalBtn = document.createElement("button");
                 nextGoalBtn.className = "status-link";
@@ -544,11 +575,22 @@
             }
           }
 
+          if (val !== "") {
+            const qualitative = statusText.split(" [")[0];
+            stabilityFill.setAttribute(
+              "aria-valuetext",
+              `Score: ${val}%, Grade: ${humanGrade} (${qualitative})`,
+            );
+          } else {
+            stabilityFill.removeAttribute("aria-valuetext");
+          }
+
           if (statusClass || statusText || nextGoalBtn) {
             status.textContent = statusText;
             if (nextGoalBtn) {
               status.appendChild(document.createTextNode(" "));
               status.appendChild(nextGoalBtn);
+              status.appendChild(document.createTextNode(" [G]"));
             }
             if (statusClass) {
               status.classList.add(statusClass);
@@ -580,6 +622,14 @@
             copyBtn.setAttribute("aria-hidden", "true");
             copyShortcut.classList.add("hidden");
             copyShortcut.setAttribute("aria-hidden", "true");
+          }
+
+          if (currentNextGoal) {
+            goalShortcut.classList.remove("hidden");
+            goalShortcut.setAttribute("aria-hidden", "false");
+          } else {
+            goalShortcut.classList.add("hidden");
+            goalShortcut.setAttribute("aria-hidden", "true");
           }
         }
       };
@@ -644,19 +694,17 @@
         scoreInput.focus();
       });
 
+      resetShortcut.addEventListener("click", () => {
+        scoreInput.value = "";
+        validate();
+        scoreInput.focus();
+      });
+
       goalShortcut.addEventListener("click", () => {
         if (currentNextGoal) {
           scoreInput.value = currentNextGoal.limit;
           validate();
-        }
-        if (
-          e.key.toLowerCase() === "c" &&
-          document.activeElement !== scoreInput &&
-          !e.ctrlKey &&
-          !e.metaKey &&
-          !e.altKey
-        ) {
-          copyBtn.click();
+          scoreInput.focus();
         }
       });
 
@@ -672,8 +720,10 @@
       });
 
       copyBtn.addEventListener("click", () => {
-        if (res.textContent === "--") return;
+        if (res.textContent === "--" || isAlreadyCopied) return;
+        const computedColor = window.getComputedStyle(res).color;
         navigator.clipboard.writeText(res.textContent).then(() => {
+          isAlreadyCopied = true;
           if (res.animate) {
             res.animate(
               [
@@ -682,7 +732,7 @@
                   textShadow: `0 0 10px ${computedColor}`,
                 },
                 {
-                  transform: "scale(1.05)",
+                  transform: "scale(1.1)",
                   textShadow: `0 0 20px ${computedColor}, 0 0 30px ${computedColor}`,
                 },
                 {
@@ -694,29 +744,14 @@
             );
           }
 
-          if (isAlreadyCopied) return;
-
           const originalText = copyBtn.textContent;
           const originalAria = copyBtn.getAttribute("aria-label");
           copyBtn.textContent = "[COPIED]";
           copyBtn.setAttribute("aria-label", "Copied to clipboard");
 
-          if (res.animate) {
-            res.animate(
-              [
-                { transform: "scale(1)", textShadow: "0 0 10px var(--accent)" },
-                {
-                  transform: "scale(1.2)",
-                  textShadow: "0 0 20px var(--accent)",
-                },
-                { transform: "scale(1)", textShadow: "0 0 10px var(--accent)" },
-              ],
-              { duration: 300, easing: "ease-out" },
-            );
-          }
-
           setTimeout(() => {
             copyBtn.textContent = originalText;
+            isAlreadyCopied = false;
             if (originalAria) {
               copyBtn.setAttribute("aria-label", originalAria);
             } else {
