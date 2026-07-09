@@ -356,7 +356,7 @@
         <button
           id="calc-shortcut"
           class="status-link"
-          aria-label="Calculate grade"
+          aria-label="Press Enter to calculate"
           title="Press Enter to calculate"
         >
           [ENTER] TO CALC
@@ -364,23 +364,23 @@
         <button
           id="copy-shortcut"
           class="status-link hidden"
-          aria-label="Copy grade to clipboard"
-          title="Press C to copy"
+          aria-label="Press C to copy grade"
+          title="Press C to copy grade"
         >
           [C] TO COPY
         </button>
         <button
           id="goal-shortcut"
           class="status-link hidden"
-          aria-label="Set next goal score"
-          title="Press G to set next goal"
+          aria-label="Press G to reach next goal"
+          title="Press G to reach next goal"
         >
           [G] NEXT GOAL
         </button>
         <button
           id="reset-shortcut"
           class="status-link"
-          aria-label="Reset calculator"
+          aria-label="Press Escape to reset"
           title="Press Escape to reset"
         >
           [ESC] TO RESET
@@ -415,6 +415,7 @@
       const resetShortcut = document.getElementById("reset-shortcut");
 
       let currentNextGoal = null;
+      let isAlreadyCopied = false;
 
       const triggerShake = (el) => {
         if (el && el.animate) {
@@ -573,6 +574,16 @@
             }
           }
 
+          if (val !== "") {
+            const qualitative = statusText.split(" [")[0];
+            stabilityFill.setAttribute(
+              "aria-valuetext",
+              `Score: ${val}%, Grade: ${humanGrade} (${qualitative})`,
+            );
+          } else {
+            stabilityFill.removeAttribute("aria-valuetext");
+          }
+
           if (statusClass || statusText || nextGoalBtn) {
             if (val !== "") {
               stabilityFill.setAttribute(
@@ -692,6 +703,12 @@
         scoreInput.focus();
       });
 
+      resetShortcut.addEventListener("click", () => {
+        scoreInput.value = "";
+        validate();
+        scoreInput.focus();
+      });
+
       goalShortcut.addEventListener("click", () => {
         if (currentNextGoal) {
           scoreInput.value = currentNextGoal.limit;
@@ -712,11 +729,10 @@
       });
 
       copyBtn.addEventListener("click", () => {
-        if (res.textContent === "--") return;
+        if (res.textContent === "--" || isAlreadyCopied) return;
         const computedColor = window.getComputedStyle(res).color;
-        const isAlreadyCopied = copyBtn.textContent === "[COPIED]";
-
         navigator.clipboard.writeText(res.textContent).then(() => {
+          isAlreadyCopied = true;
           if (res.animate) {
             res.animate(
               [
@@ -725,7 +741,7 @@
                   textShadow: `0 0 10px ${computedColor}`,
                 },
                 {
-                  transform: "scale(1.05)",
+                  transform: "scale(1.1)",
                   textShadow: `0 0 20px ${computedColor}, 0 0 30px ${computedColor}`,
                 },
                 {
@@ -737,29 +753,14 @@
             );
           }
 
-          if (isAlreadyCopied) return;
-
           const originalText = copyBtn.textContent;
           const originalAria = copyBtn.getAttribute("aria-label");
           copyBtn.textContent = "[COPIED]";
           copyBtn.setAttribute("aria-label", "Copied to clipboard");
 
-          if (res.animate) {
-            res.animate(
-              [
-                { transform: "scale(1)", textShadow: "0 0 10px var(--accent)" },
-                {
-                  transform: "scale(1.2)",
-                  textShadow: "0 0 20px var(--accent)",
-                },
-                { transform: "scale(1)", textShadow: "0 0 10px var(--accent)" },
-              ],
-              { duration: 300, easing: "ease-out" },
-            );
-          }
-
           setTimeout(() => {
             copyBtn.textContent = originalText;
+            isAlreadyCopied = false;
             if (originalAria) {
               copyBtn.setAttribute("aria-label", originalAria);
             } else {
