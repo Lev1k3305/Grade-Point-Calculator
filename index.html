@@ -84,6 +84,18 @@
         border-color: var(--accent);
         box-shadow: 0 0 10px var(--accent);
       }
+      input.status-good:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 10px var(--accent);
+      }
+      input.status-ok:focus {
+        border-color: #f1c40f;
+        box-shadow: 0 0 10px #f1c40f;
+      }
+      input.status-fail:focus {
+        border-color: var(--pink);
+        box-shadow: 0 0 10px var(--pink);
+      }
       input:invalid {
         border-color: var(--pink);
       }
@@ -465,6 +477,7 @@
         const wasInvalid = scoreInput.getAttribute("aria-invalid") === "true";
         // Reset classes
         res.classList.remove("fail", "status-good", "status-ok", "status-fail");
+        scoreInput.classList.remove("status-good", "status-ok", "status-fail");
         status.classList.remove(
           "status-good",
           "status-ok",
@@ -567,6 +580,7 @@
                 );
                 nextGoalBtn.onclick = () => {
                   scoreInput.value = next.limit;
+                  triggerPulse(scoreInput);
                   validate();
                   scoreInput.focus();
                 };
@@ -603,6 +617,7 @@
             if (statusClass) {
               status.classList.add(statusClass);
               res.classList.add(statusClass);
+              scoreInput.classList.add(statusClass);
             }
 
             // Stability bar color
@@ -684,6 +699,7 @@
         ) {
           triggerPulse(goalShortcut);
           scoreInput.value = currentNextGoal.limit;
+          triggerPulse(scoreInput);
           validate();
           scoreInput.focus();
         }
@@ -704,6 +720,7 @@
       });
 
       resetShortcut.addEventListener("click", () => {
+        triggerPulse(resetShortcut);
         scoreInput.value = "";
         validate();
         scoreInput.focus();
@@ -712,6 +729,7 @@
       goalShortcut.addEventListener("click", () => {
         if (currentNextGoal) {
           scoreInput.value = currentNextGoal.limit;
+          triggerPulse(scoreInput);
           validate();
           scoreInput.focus();
         }
@@ -768,14 +786,6 @@
             }
           }, 1500);
         });
-      });
-
-      // For testing
-      resetShortcut.addEventListener("click", () => {
-        triggerPulse(resetShortcut);
-        scoreInput.value = "";
-        validate();
-        scoreInput.focus();
       });
 
       // For testing
