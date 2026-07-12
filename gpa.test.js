@@ -455,4 +455,18 @@ describe("Grade Calculation Logic", () => {
 
     expect(win.navigator.clipboard.writeText).toHaveBeenCalledWith("A+");
   });
+
+  it("applies status-fail class to score input for failing scores", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+
+    scoreInput.value = "40";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(scoreInput.classList.contains("status-fail")).toBe(true);
+
+    scoreInput.value = "85";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(scoreInput.classList.contains("status-fail")).toBe(false);
+    expect(scoreInput.classList.contains("status-good")).toBe(true);
+  });
 });
