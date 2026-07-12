@@ -212,7 +212,7 @@
         display: flex;
         justify-content: space-between;
         gap: 5px;
-        font-size: 0.6rem;
+        font-size: 0.7rem;
         color: var(--dim);
         text-transform: uppercase;
       }
@@ -242,7 +242,7 @@
         text-shadow: 0 0 10px #f1c40f !important;
       }
       .status-msg {
-        font-size: 0.6rem;
+        font-size: 0.7rem;
         font-weight: bold;
         text-transform: uppercase;
         margin-bottom: 8px;
@@ -458,6 +458,13 @@
         }
       };
 
+      const updateInput = (val) => {
+        scoreInput.value = val;
+        validate();
+        scoreInput.focus();
+        triggerPulse(scoreInput);
+      };
+
       const calculateGrade = (n) => {
         if (n === null || n === "") return "--";
         const s = parseFloat(n);
@@ -579,10 +586,7 @@
                   `Set score to ${next.limit} to reach grade ${next.label.replace("+", " plus")}`,
                 );
                 nextGoalBtn.onclick = () => {
-                  scoreInput.value = next.limit;
-                  triggerPulse(scoreInput);
-                  validate();
-                  scoreInput.focus();
+                  updateInput(next.limit);
                 };
               }
             }
@@ -680,9 +684,7 @@
 
         if (e.key === "Escape") {
           triggerPulse(resetShortcut);
-          scoreInput.value = "";
-          validate();
-          scoreInput.focus();
+          updateInput("");
         } else if (
           key === "c" &&
           !isInputFocused &&
@@ -698,10 +700,7 @@
           currentNextGoal
         ) {
           triggerPulse(goalShortcut);
-          scoreInput.value = currentNextGoal.limit;
-          triggerPulse(scoreInput);
-          validate();
-          scoreInput.focus();
+          updateInput(currentNextGoal.limit);
         }
       });
 
@@ -720,31 +719,17 @@
       });
 
       resetShortcut.addEventListener("click", () => {
-        triggerPulse(resetShortcut);
-        scoreInput.value = "";
-        validate();
-        scoreInput.focus();
+        updateInput("");
       });
 
       goalShortcut.addEventListener("click", () => {
         if (currentNextGoal) {
-          scoreInput.value = currentNextGoal.limit;
-          triggerPulse(scoreInput);
-          validate();
-          scoreInput.focus();
+          updateInput(currentNextGoal.limit);
         }
       });
 
       btn.addEventListener("click", validate);
 
-      status.addEventListener("click", (e) => {
-        const goalBtn = e.target.closest(".goal-btn");
-        if (goalBtn) {
-          scoreInput.value = goalBtn.dataset.target;
-          validate();
-          scoreInput.focus();
-        }
-      });
 
       copyBtn.addEventListener("click", () => {
         if (res.textContent === "--" || isAlreadyCopied) return;
@@ -788,8 +773,10 @@
         });
       });
 
+
       // For testing
       window.calculateGrade = calculateGrade;
+      window.updateInput = updateInput;
 
       // Initialize
       const savedScore = localStorage.getItem("gpa_score");

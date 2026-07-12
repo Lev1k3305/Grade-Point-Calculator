@@ -456,17 +456,35 @@ describe("Grade Calculation Logic", () => {
     expect(win.navigator.clipboard.writeText).toHaveBeenCalledWith("A+");
   });
 
-  it("applies status-fail class to score input for failing scores", () => {
+  it("applies status classes to score input based on grade tier", () => {
     const { document } = window;
     const scoreInput = document.getElementById("score");
 
-    scoreInput.value = "40";
+    // Good status (A+)
+    scoreInput.value = "95";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(scoreInput.classList.contains("status-good")).toBe(true);
+
+    // Ok status (C)
+    scoreInput.value = "65";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(scoreInput.classList.contains("status-ok")).toBe(true);
+
+    // Fail status (F)
+    scoreInput.value = "45";
     scoreInput.dispatchEvent(new window.Event("input"));
     expect(scoreInput.classList.contains("status-fail")).toBe(true);
+  });
 
-    scoreInput.value = "85";
-    scoreInput.dispatchEvent(new window.Event("input"));
-    expect(scoreInput.classList.contains("status-fail")).toBe(false);
+  it("updates input via updateInput helper", () => {
+    const { document, window: win } = window;
+    const scoreInput = document.getElementById("score");
+    const { updateInput } = win;
+
+    updateInput("85");
+    expect(scoreInput.value).toBe("85");
+    expect(document.getElementById("res").textContent).toBe("A");
+    expect(document.activeElement).toBe(scoreInput);
     expect(scoreInput.classList.contains("status-good")).toBe(true);
   });
 });
