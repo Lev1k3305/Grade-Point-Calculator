@@ -487,4 +487,40 @@ describe("Grade Calculation Logic", () => {
     expect(document.activeElement).toBe(scoreInput);
     expect(scoreInput.classList.contains("status-good")).toBe(true);
   });
+
+  it("handles Shift+ArrowUp and Shift+ArrowDown for jumping by 10", () => {
+    const { document, window: win } = window;
+    const scoreInput = document.getElementById("score");
+
+    scoreInput.value = "50";
+    scoreInput.dispatchEvent(new win.Event("input"));
+
+    // Shift + ArrowUp
+    const upEvent = new win.KeyboardEvent("keydown", {
+      key: "ArrowUp",
+      shiftKey: true,
+      bubbles: true,
+    });
+    scoreInput.dispatchEvent(upEvent);
+    expect(scoreInput.value).toBe("60");
+
+    // Shift + ArrowDown
+    const downEvent = new win.KeyboardEvent("keydown", {
+      key: "ArrowDown",
+      shiftKey: true,
+      bubbles: true,
+    });
+    scoreInput.dispatchEvent(downEvent);
+    expect(scoreInput.value).toBe("50");
+
+    // Clamping at 100
+    scoreInput.value = "95";
+    scoreInput.dispatchEvent(upEvent);
+    expect(scoreInput.value).toBe("100");
+
+    // Clamping at 0
+    scoreInput.value = "5";
+    scoreInput.dispatchEvent(downEvent);
+    expect(scoreInput.value).toBe("0");
+  });
 });

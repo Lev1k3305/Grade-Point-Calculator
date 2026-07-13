@@ -370,6 +370,7 @@
           class="status-link"
           aria-label="Press Enter to calculate"
           title="Press Enter to calculate"
+          aria-keyshortcuts="Enter"
         >
           [ENTER] TO CALC
         </button>
@@ -378,6 +379,7 @@
           class="status-link hidden"
           aria-label="Press C to copy grade"
           title="Press C to copy grade"
+          aria-keyshortcuts="c"
         >
           [C] TO COPY
         </button>
@@ -386,6 +388,7 @@
           class="status-link hidden"
           aria-label="Press G to reach next goal"
           title="Press G to reach next goal"
+          aria-keyshortcuts="g"
         >
           [G] NEXT GOAL
         </button>
@@ -394,6 +397,7 @@
           class="status-link"
           aria-label="Press Escape to reset"
           title="Press Escape to reset"
+          aria-keyshortcuts="Escape"
         >
           [ESC] TO RESET
         </button>
@@ -407,6 +411,7 @@
             id="copy-btn"
             class="copy-btn hidden"
             aria-label="Copy grade to clipboard"
+            title="Copy grade to clipboard"
           >
             [COPY]
           </button>
@@ -581,10 +586,9 @@
                 nextGoalBtn = document.createElement("button");
                 nextGoalBtn.className = "status-link";
                 nextGoalBtn.textContent = `[ +${parseFloat(diff)} TO ${next.label} ]`;
-                nextGoalBtn.setAttribute(
-                  "aria-label",
-                  `Set score to ${next.limit} to reach grade ${next.label.replace("+", " plus")}`,
-                );
+                const label = `Set score to ${next.limit} to reach grade ${next.label.replace("+", " plus")}`;
+                nextGoalBtn.setAttribute("aria-label", label);
+                nextGoalBtn.setAttribute("title", label);
                 nextGoalBtn.onclick = () => {
                   updateInput(next.limit);
                 };
@@ -674,6 +678,15 @@
             triggerPulse(calcShortcut);
             btn.click();
           }
+        } else if (
+          e.shiftKey &&
+          (e.key === "ArrowUp" || e.key === "ArrowDown")
+        ) {
+          e.preventDefault();
+          const currentVal = parseFloat(scoreInput.value) || 0;
+          const step = e.key === "ArrowUp" ? 10 : -10;
+          const newVal = Math.max(0, Math.min(100, currentVal + step));
+          updateInput(newVal);
         }
       });
 
@@ -730,7 +743,6 @@
 
       btn.addEventListener("click", validate);
 
-
       copyBtn.addEventListener("click", () => {
         if (res.textContent === "--" || isAlreadyCopied) return;
         const computedColor = window.getComputedStyle(res).color;
@@ -772,7 +784,6 @@
           }, 1500);
         });
       });
-
 
       // For testing
       window.calculateGrade = calculateGrade;
