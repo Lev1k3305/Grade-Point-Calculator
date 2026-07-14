@@ -259,7 +259,7 @@
         font-weight: inherit;
         text-transform: inherit;
         letter-spacing: inherit;
-        padding: 0;
+        padding: 4px 0;
         cursor: pointer;
         text-decoration: underline;
         display: inline;
@@ -310,7 +310,7 @@
         font: inherit;
         text-transform: inherit;
         cursor: pointer;
-        padding: 0;
+        padding: 4px 0;
         text-decoration: none;
         letter-spacing: inherit;
       }
@@ -335,7 +335,8 @@
       <h1>Grade Calculator</h1>
       <div class="input-group">
         <label for="score">
-          Score (0-100) <span style="color: var(--pink)">*</span>
+          Score (0-100)
+          <span style="color: var(--pink)" aria-hidden="true">*</span>
         </label>
         <input
           type="number"
@@ -353,6 +354,17 @@
         />
         <div class="stability-bar">
           <div
+            id="stability-ghost"
+            class="stability-fill"
+            style="
+              width: 0%;
+              position: absolute;
+              opacity: 0.3;
+              background: var(--accent);
+              transition: width 0.3s ease;
+            "
+          ></div>
+          <div
             id="stability-fill"
             class="stability-fill"
             role="progressbar"
@@ -365,7 +377,7 @@
         <p id="err" class="error" role="alert"></p>
       </div>
       <button class="btn" id="btn">Calculate</button>
-      <div class="shortcuts">
+      <div class="shortcuts" aria-label="Quick actions">
         <button
           id="calc-shortcut"
           class="status-link"
@@ -431,6 +443,7 @@
       const copyShortcut = document.getElementById("copy-shortcut");
       const goalShortcut = document.getElementById("goal-shortcut");
       const resetShortcut = document.getElementById("reset-shortcut");
+      const stabilityGhost = document.getElementById("stability-ghost");
 
       let currentNextGoal = null;
       let isAlreadyCopied = false;
@@ -598,6 +611,12 @@
                 nextGoalBtn.onclick = () => {
                   updateInput(next.limit);
                 };
+                nextGoalBtn.onmouseenter = nextGoalBtn.onfocus = () => {
+                  stabilityGhost.style.width = next.limit + "%";
+                };
+                nextGoalBtn.onmouseleave = nextGoalBtn.onblur = () => {
+                  stabilityGhost.style.width = "0%";
+                };
               }
             }
           }
@@ -722,6 +741,21 @@
           triggerPulse(goalShortcut);
           updateInput(currentNextGoal.limit);
         }
+      });
+
+      goalShortcut.addEventListener("mouseenter", () => {
+        if (currentNextGoal)
+          stabilityGhost.style.width = currentNextGoal.limit + "%";
+      });
+      goalShortcut.addEventListener("focus", () => {
+        if (currentNextGoal)
+          stabilityGhost.style.width = currentNextGoal.limit + "%";
+      });
+      goalShortcut.addEventListener("mouseleave", () => {
+        stabilityGhost.style.width = "0%";
+      });
+      goalShortcut.addEventListener("blur", () => {
+        stabilityGhost.style.width = "0%";
       });
 
       calcShortcut.addEventListener("click", () => {

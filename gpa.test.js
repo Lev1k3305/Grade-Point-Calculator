@@ -367,7 +367,9 @@ describe("Grade Calculation Logic", () => {
     scoreInput.dispatchEvent(new window.Event("input"));
 
     expect(copyShortcut.textContent).toBe("[C] COPY [A]");
-    expect(copyShortcut.getAttribute("aria-label")).toBe("Press C to copy grade A");
+    expect(copyShortcut.getAttribute("aria-label")).toBe(
+      "Press C to copy grade A",
+    );
     expect(goalShortcut.textContent).toBe("[G] TO [A+]");
     expect(goalShortcut.getAttribute("aria-label")).toBe(
       "Press G to reach grade A plus",
@@ -567,5 +569,44 @@ describe("Grade Calculation Logic", () => {
     scoreInput.value = "80";
     scoreInput.dispatchEvent(new window.Event("input"));
     expect(copyBtn.textContent).toBe("[COPY]");
+  });
+
+  it("shows ghost preview on goal button hover/focus", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const stabilityGhost = document.getElementById("stability-ghost");
+    const status = document.getElementById("status");
+    const goalShortcut = document.getElementById("goal-shortcut");
+
+    scoreInput.value = "85";
+    scoreInput.dispatchEvent(new window.Event("input"));
+
+    // Dynamic goal button
+    const nextGoalBtn = status.querySelector(".status-link");
+    expect(nextGoalBtn).not.toBeNull();
+
+    // Hover
+    nextGoalBtn.dispatchEvent(new window.Event("mouseenter"));
+    expect(stabilityGhost.style.width).toBe("90%");
+
+    // Unhover
+    nextGoalBtn.dispatchEvent(new window.Event("mouseleave"));
+    expect(stabilityGhost.style.width).toBe("0%");
+
+    // Focus
+    nextGoalBtn.dispatchEvent(new window.Event("focus"));
+    expect(stabilityGhost.style.width).toBe("90%");
+
+    // Blur
+    nextGoalBtn.dispatchEvent(new window.Event("blur"));
+    expect(stabilityGhost.style.width).toBe("0%");
+
+    // Goal Shortcut Hover
+    goalShortcut.dispatchEvent(new window.Event("mouseenter"));
+    expect(stabilityGhost.style.width).toBe("90%");
+
+    // Goal Shortcut Unhover
+    goalShortcut.dispatchEvent(new window.Event("mouseleave"));
+    expect(stabilityGhost.style.width).toBe("0%");
   });
 });
