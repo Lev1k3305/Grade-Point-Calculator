@@ -350,11 +350,33 @@ describe("Grade Calculation Logic", () => {
     scoreInput.value = "75";
     scoreInput.dispatchEvent(new window.Event("input"));
 
-    expect(goalShortcut.textContent).toContain("[G] NEXT GOAL");
+    expect(goalShortcut.textContent).toBe("[G] TO [A]");
 
     goalShortcut.click();
     expect(scoreInput.value).toBe("80");
     expect(document.getElementById("res").textContent).toBe("A");
+  });
+
+  it("updates shortcut text contextually", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const copyShortcut = document.getElementById("copy-shortcut");
+    const goalShortcut = document.getElementById("goal-shortcut");
+
+    scoreInput.value = "85";
+    scoreInput.dispatchEvent(new window.Event("input"));
+
+    expect(copyShortcut.textContent).toBe("[C] COPY [A]");
+    expect(copyShortcut.getAttribute("aria-label")).toBe("Press C to copy grade A");
+    expect(goalShortcut.textContent).toBe("[G] TO [A+]");
+    expect(goalShortcut.getAttribute("aria-label")).toBe(
+      "Press G to reach grade A plus",
+    );
+
+    scoreInput.value = "75";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(copyShortcut.textContent).toBe("[C] COPY [B]");
+    expect(goalShortcut.textContent).toBe("[G] TO [A]");
   });
 
   it("triggers copy action when 'c' is pressed and input is not focused", () => {
@@ -522,5 +544,28 @@ describe("Grade Calculation Logic", () => {
     scoreInput.value = "5";
     scoreInput.dispatchEvent(downEvent);
     expect(scoreInput.value).toBe("0");
+  });
+
+  it("resets copy state when input changes", async () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const copyBtn = document.getElementById("copy-btn");
+
+    // Mock clipboard
+    window.navigator.clipboard = {
+      writeText: vi.fn(() => Promise.resolve()),
+    };
+
+    scoreInput.value = "90";
+    scoreInput.dispatchEvent(new window.Event("input"));
+
+    copyBtn.click();
+    // Wait for the clipboard promise to resolve
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(copyBtn.textContent).toBe("[COPIED]");
+
+    scoreInput.value = "80";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(copyBtn.textContent).toBe("[COPY]");
   });
 });
