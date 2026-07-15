@@ -11,5 +11,11 @@
 **Action:** Explicitly reset transient UI states (like success labels) in the primary validation/input handler of the component.
 
 ## 2025-05-15 - Predictive Ghost Previews
+
 **Learning:** For actions that result in a quantifiable change to a progress indicator (like reaching a "Next Goal"), a "Ghost Preview" (a semi-transparent overlay showing the target state) significantly reduces cognitive load and provides immediate visual validation of the prospective action.
 **Action:** When an action has a predictable effect on a gauge or progress bar, implement a hover/focus state that previews the result visually.
+
+## 2025-10-24 - Semantic Color Coding for Shortcuts
+
+**Learning:** Aligning keyboard shortcut hints with the existing semantic color system (e.g., matching the 'Copy' shortcut color with the 'Result' color) reinforces the mental model of the interface without introducing new visual noise.
+**Action:** Always leverage existing design tokens and utility classes for micro-UX enhancements to maintain system consistency.

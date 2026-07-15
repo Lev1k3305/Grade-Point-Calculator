@@ -380,7 +380,7 @@
       <div class="shortcuts" aria-label="Quick actions">
         <button
           id="calc-shortcut"
-          class="status-link"
+          class="status-link status-fail"
           aria-label="Press Enter to calculate"
           title="Press Enter to calculate"
           aria-keyshortcuts="Enter"
@@ -389,7 +389,7 @@
         </button>
         <button
           id="copy-shortcut"
-          class="status-link hidden"
+          class="status-link status-good hidden"
           aria-label="Press C to copy grade"
           title="Press C to copy grade"
           aria-keyshortcuts="c"
@@ -398,7 +398,7 @@
         </button>
         <button
           id="goal-shortcut"
-          class="status-link hidden"
+          class="status-link status-ok hidden"
           aria-label="Press G to reach next goal"
           title="Press G to reach next goal"
           aria-keyshortcuts="g"
@@ -407,7 +407,7 @@
         </button>
         <button
           id="reset-shortcut"
-          class="status-link"
+          class="status-link status-fail"
           aria-label="Press Escape to reset"
           title="Press Escape to reset"
           aria-keyshortcuts="Escape"
@@ -603,7 +603,7 @@
                 currentNextGoal = next;
                 const diff = (next.limit - s).toFixed(s % 1 === 0 ? 0 : 1);
                 nextGoalBtn = document.createElement("button");
-                nextGoalBtn.className = "status-link";
+                nextGoalBtn.className = "status-link status-ok";
                 nextGoalBtn.textContent = `[ +${parseFloat(diff)} TO ${next.label} ]`;
                 const label = `Set score to ${next.limit} to reach grade ${next.label.replace("+", " plus")}`;
                 nextGoalBtn.setAttribute("aria-label", label);
