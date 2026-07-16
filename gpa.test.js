@@ -578,16 +578,18 @@ describe("Grade Calculation Logic", () => {
     const status = document.getElementById("status");
     const goalShortcut = document.getElementById("goal-shortcut");
 
+    // Next goal is A+ (using var(--accent))
     scoreInput.value = "85";
     scoreInput.dispatchEvent(new window.Event("input"));
 
     // Dynamic goal button
-    const nextGoalBtn = status.querySelector(".status-link");
+    let nextGoalBtn = status.querySelector(".status-link");
     expect(nextGoalBtn).not.toBeNull();
 
     // Hover
     nextGoalBtn.dispatchEvent(new window.Event("mouseenter"));
     expect(stabilityGhost.style.width).toBe("90%");
+    expect(stabilityGhost.style.background).toBe("var(--accent)");
 
     // Unhover
     nextGoalBtn.dispatchEvent(new window.Event("mouseleave"));
@@ -596,6 +598,7 @@ describe("Grade Calculation Logic", () => {
     // Focus
     nextGoalBtn.dispatchEvent(new window.Event("focus"));
     expect(stabilityGhost.style.width).toBe("90%");
+    expect(stabilityGhost.style.background).toBe("var(--accent)");
 
     // Blur
     nextGoalBtn.dispatchEvent(new window.Event("blur"));
@@ -604,9 +607,24 @@ describe("Grade Calculation Logic", () => {
     // Goal Shortcut Hover
     goalShortcut.dispatchEvent(new window.Event("mouseenter"));
     expect(stabilityGhost.style.width).toBe("90%");
+    expect(stabilityGhost.style.background).toBe("var(--accent)");
 
     // Goal Shortcut Unhover
     goalShortcut.dispatchEvent(new window.Event("mouseleave"));
     expect(stabilityGhost.style.width).toBe("0%");
+
+    // Next goal is D (using #f1c40f)
+    scoreInput.value = "45";
+    scoreInput.dispatchEvent(new window.Event("input"));
+
+    nextGoalBtn = status.querySelector(".status-link");
+    expect(nextGoalBtn).not.toBeNull();
+
+    nextGoalBtn.dispatchEvent(new window.Event("mouseenter"));
+    expect(stabilityGhost.style.width).toBe("50%");
+    expect(
+      stabilityGhost.style.background === "#f1c40f" ||
+        stabilityGhost.style.background === "rgb(241, 196, 15)",
+    ).toBe(true);
   });
 });

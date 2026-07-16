@@ -448,6 +448,20 @@
       let currentNextGoal = null;
       let isAlreadyCopied = false;
 
+      const showGhost = (goal) => {
+        if (!goal) return;
+        if (goal.label === "D" || goal.label === "C") {
+          stabilityGhost.style.background = "#f1c40f";
+        } else {
+          stabilityGhost.style.background = "var(--accent)";
+        }
+        stabilityGhost.style.width = goal.limit + "%";
+      };
+
+      const hideGhost = () => {
+        stabilityGhost.style.width = "0%";
+      };
+
       const triggerShake = (el) => {
         if (el && el.animate) {
           el.animate(
@@ -612,10 +626,10 @@
                   updateInput(next.limit);
                 };
                 nextGoalBtn.onmouseenter = nextGoalBtn.onfocus = () => {
-                  stabilityGhost.style.width = next.limit + "%";
+                  showGhost(next);
                 };
                 nextGoalBtn.onmouseleave = nextGoalBtn.onblur = () => {
-                  stabilityGhost.style.width = "0%";
+                  hideGhost();
                 };
               }
             }
@@ -744,18 +758,16 @@
       });
 
       goalShortcut.addEventListener("mouseenter", () => {
-        if (currentNextGoal)
-          stabilityGhost.style.width = currentNextGoal.limit + "%";
+        if (currentNextGoal) showGhost(currentNextGoal);
       });
       goalShortcut.addEventListener("focus", () => {
-        if (currentNextGoal)
-          stabilityGhost.style.width = currentNextGoal.limit + "%";
+        if (currentNextGoal) showGhost(currentNextGoal);
       });
       goalShortcut.addEventListener("mouseleave", () => {
-        stabilityGhost.style.width = "0%";
+        hideGhost();
       });
       goalShortcut.addEventListener("blur", () => {
-        stabilityGhost.style.width = "0%";
+        hideGhost();
       });
 
       calcShortcut.addEventListener("click", () => {
