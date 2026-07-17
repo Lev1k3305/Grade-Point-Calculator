@@ -13,3 +13,8 @@
 ## 2025-05-15 - Predictive Ghost Previews
 **Learning:** For actions that result in a quantifiable change to a progress indicator (like reaching a "Next Goal"), a "Ghost Preview" (a semi-transparent overlay showing the target state) significantly reduces cognitive load and provides immediate visual validation of the prospective action.
 **Action:** When an action has a predictable effect on a gauge or progress bar, implement a hover/focus state that previews the result visually.
+
+## 2025-07-17 - Deferred Required Field Validation Style
+
+**Learning:** Styling inputs on native `:invalid` when they are `required` causes a jarring, premature red/pink error border on initial page load when the input is empty. Additionally, displaying "required" errors while typing can feel aggressive.
+**Action:** Bind invalid styles to `input[aria-invalid="true"]` instead of native `input:invalid`, and defer showing empty required field errors until the user actively clicks submit/Calculate or hits Enter. Automatically clear the error as soon as they type.

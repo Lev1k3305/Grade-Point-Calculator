@@ -92,11 +92,12 @@
         border-color: #f1c40f;
         box-shadow: 0 0 10px #f1c40f;
       }
-      input.status-fail:focus {
+      input.status-fail:focus,
+      input[aria-invalid="true"]:focus {
         border-color: var(--pink);
         box-shadow: 0 0 10px var(--pink);
       }
-      input:invalid {
+      input[aria-invalid="true"] {
         border-color: var(--pink);
       }
       .stability-bar {
@@ -479,7 +480,7 @@
 
       const updateInput = (val) => {
         scoreInput.value = val;
-        validate();
+        validate(false);
         scoreInput.focus();
         triggerPulse(scoreInput);
       };
@@ -496,7 +497,7 @@
         return "F";
       };
 
-      const validate = () => {
+      const validate = (forceRequired = false) => {
         const val = scoreInput.value;
         localStorage.setItem("gpa_score", val);
         const oldGrade = res.textContent;
@@ -522,7 +523,22 @@
         copyBtn.textContent = "[COPY]";
         copyBtn.setAttribute("aria-label", "Copy grade to clipboard");
 
-        if (val !== "" && (val < 0 || val > 100)) {
+        if (val === "" && forceRequired) {
+          err.textContent = "SYSTEM_ERROR: Score is required";
+          scoreInput.setAttribute("aria-invalid", "true");
+          if (!wasInvalid) triggerShake(scoreInput);
+          btn.disabled = false; // Keep calculate button active so user can click it again
+          res.textContent = "--";
+          res.setAttribute("aria-label", "Grade: None");
+          stabilityFill.removeAttribute("aria-valuetext");
+          status.textContent = "";
+          copyBtn.classList.add("hidden");
+          stabilityFill.style.width = "0%";
+          copyShortcut.classList.add("hidden");
+          copyShortcut.setAttribute("aria-hidden", "true");
+          goalShortcut.classList.add("hidden");
+          goalShortcut.setAttribute("aria-hidden", "true");
+        } else if (val !== "" && (val < 0 || val > 100)) {
           err.textContent = "SYSTEM_ERROR: Range 0-100 only";
           scoreInput.setAttribute("aria-invalid", "true");
           if (!wasInvalid) triggerShake(scoreInput);
@@ -534,6 +550,10 @@
           status.textContent = "";
           copyBtn.classList.add("hidden");
           stabilityFill.style.width = "0%";
+          copyShortcut.classList.add("hidden");
+          copyShortcut.setAttribute("aria-hidden", "true");
+          goalShortcut.classList.add("hidden");
+          goalShortcut.setAttribute("aria-hidden", "true");
         } else {
           err.textContent = "";
           scoreInput.setAttribute("aria-invalid", "false");
@@ -692,7 +712,7 @@
         }
       };
 
-      scoreInput.addEventListener("input", validate);
+      scoreInput.addEventListener("input", () => validate(false));
       scoreInput.addEventListener("focus", function () {
         this.select();
       });
@@ -782,7 +802,7 @@
         }
       });
 
-      btn.addEventListener("click", validate);
+      btn.addEventListener("click", () => validate(true));
 
       copyBtn.addEventListener("click", () => {
         if (res.textContent === "--" || isAlreadyCopied) return;
@@ -835,7 +855,7 @@
       if (savedScore !== null) {
         scoreInput.value = savedScore;
       }
-      validate();
+      validate(false);
     </script>
   </body>
 </html>

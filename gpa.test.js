@@ -609,4 +609,26 @@ describe("Grade Calculation Logic", () => {
     goalShortcut.dispatchEvent(new window.Event("mouseleave"));
     expect(stabilityGhost.style.width).toBe("0%");
   });
+
+  it("handles required field validation on submit", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const err = document.getElementById("err");
+    const btn = document.getElementById("btn");
+
+    // Initially empty input, no validation error on load
+    expect(err.textContent).toBe("");
+    expect(scoreInput.getAttribute("aria-invalid")).toBe("false");
+
+    // Click calculate (submit) on empty input -> should trigger error
+    btn.click();
+    expect(err.textContent).toBe("SYSTEM_ERROR: Score is required");
+    expect(scoreInput.getAttribute("aria-invalid")).toBe("true");
+
+    // Type a valid score -> should clear the error
+    scoreInput.value = "75";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(err.textContent).toBe("");
+    expect(scoreInput.getAttribute("aria-invalid")).toBe("false");
+  });
 });
