@@ -11,5 +11,11 @@
 **Action:** Explicitly reset transient UI states (like success labels) in the primary validation/input handler of the component.
 
 ## 2025-05-15 - Predictive Ghost Previews
+
 **Learning:** For actions that result in a quantifiable change to a progress indicator (like reaching a "Next Goal"), a "Ghost Preview" (a semi-transparent overlay showing the target state) significantly reduces cognitive load and provides immediate visual validation of the prospective action.
 **Action:** When an action has a predictable effect on a gauge or progress bar, implement a hover/focus state that previews the result visually.
+
+## 2025-05-16 - Deferred Required Field Validation
+
+**Learning:** To prevent jarring, premature error styling on required fields (like displaying errors/shaking empty inputs on initial page load or when backspacing), required validation should be deferred until a submission action (e.g., clicking Calculate or pressing Enter) is explicitly made. Typing inside the field should then clear the error state immediately.
+**Action:** When implementing required fields, only show the validation feedback upon explicit submit actions, and clear the feedback on any subsequent input.

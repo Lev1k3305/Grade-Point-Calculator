@@ -496,7 +496,10 @@
         return "F";
       };
 
-      const validate = () => {
+      const validate = (isSubmit = false) => {
+        if (isSubmit instanceof Event) {
+          isSubmit = false;
+        }
         const val = scoreInput.value;
         localStorage.setItem("gpa_score", val);
         const oldGrade = res.textContent;
@@ -521,6 +524,20 @@
         isAlreadyCopied = false;
         copyBtn.textContent = "[COPY]";
         copyBtn.setAttribute("aria-label", "Copy grade to clipboard");
+
+        if (val === "" && isSubmit) {
+          err.textContent = "SYSTEM_ERROR: Score is required";
+          scoreInput.setAttribute("aria-invalid", "true");
+          triggerShake(scoreInput);
+          btn.disabled = false;
+          res.textContent = "--";
+          res.setAttribute("aria-label", "Grade: None");
+          stabilityFill.removeAttribute("aria-valuetext");
+          status.textContent = "";
+          copyBtn.classList.add("hidden");
+          stabilityFill.style.width = "0%";
+          return;
+        }
 
         if (val !== "" && (val < 0 || val > 100)) {
           err.textContent = "SYSTEM_ERROR: Range 0-100 only";
@@ -782,7 +799,7 @@
         }
       });
 
-      btn.addEventListener("click", validate);
+      btn.addEventListener("click", () => validate(true));
 
       copyBtn.addEventListener("click", () => {
         if (res.textContent === "--" || isAlreadyCopied) return;

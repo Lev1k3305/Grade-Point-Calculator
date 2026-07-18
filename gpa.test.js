@@ -609,4 +609,29 @@ describe("Grade Calculation Logic", () => {
     goalShortcut.dispatchEvent(new window.Event("mouseleave"));
     expect(stabilityGhost.style.width).toBe("0%");
   });
+
+  it("displays SYSTEM_ERROR: Score is required on empty submission, then clears on input", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const err = document.getElementById("err");
+    const btn = document.getElementById("btn");
+
+    // Make sure input starts empty and has no error
+    scoreInput.value = "";
+    scoreInput.setAttribute("aria-invalid", "false");
+    err.textContent = "";
+
+    // Trigger click on Calculate button
+    btn.click();
+
+    expect(err.textContent).toBe("SYSTEM_ERROR: Score is required");
+    expect(scoreInput.getAttribute("aria-invalid")).toBe("true");
+
+    // Start typing to clear the error
+    scoreInput.value = "7";
+    scoreInput.dispatchEvent(new window.Event("input"));
+
+    expect(err.textContent).toBe("");
+    expect(scoreInput.getAttribute("aria-invalid")).toBe("false");
+  });
 });
