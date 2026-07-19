@@ -609,4 +609,43 @@ describe("Grade Calculation Logic", () => {
     goalShortcut.dispatchEvent(new window.Event("mouseleave"));
     expect(stabilityGhost.style.width).toBe("0%");
   });
+
+  it("defers required field validation feedback until explicit calculation attempt", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const err = document.getElementById("err");
+    const btn = document.getElementById("btn");
+
+    // Initially or during typing, empty input should not show "required" error
+    scoreInput.value = "";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(err.textContent).toBe("");
+    expect(scoreInput.getAttribute("aria-invalid")).toBe("false");
+
+    // Clicking calculate should trigger "required" validation feedback
+    btn.click();
+    expect(err.textContent).toBe("SYSTEM_ERROR: Score is required");
+    expect(scoreInput.getAttribute("aria-invalid")).toBe("true");
+
+    // Typing a value should immediately clear the required error feedback
+    scoreInput.value = "5";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(err.textContent).toBe("");
+    expect(scoreInput.getAttribute("aria-invalid")).toBe("false");
+
+    // Clearing input by typing should keep it clear of errors
+    scoreInput.value = "";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(err.textContent).toBe("");
+    expect(scoreInput.getAttribute("aria-invalid")).toBe("false");
+
+    // Pressing Enter on empty input should trigger required validation error
+    const enterEvent = new window.KeyboardEvent("keydown", {
+      key: "Enter",
+      bubbles: true,
+    });
+    scoreInput.dispatchEvent(enterEvent);
+    expect(err.textContent).toBe("SYSTEM_ERROR: Score is required");
+    expect(scoreInput.getAttribute("aria-invalid")).toBe("true");
+  });
 });
