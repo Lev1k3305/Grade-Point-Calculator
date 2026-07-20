@@ -497,9 +497,7 @@
       };
 
       const validate = (isSubmit = false) => {
-        if (isSubmit instanceof Event) {
-          isSubmit = false;
-        }
+        const isExplicitSubmit = isSubmit === true;
         const val = scoreInput.value;
         localStorage.setItem("gpa_score", val);
         const oldGrade = res.textContent;
@@ -525,21 +523,34 @@
         copyBtn.textContent = "[COPY]";
         copyBtn.setAttribute("aria-label", "Copy grade to clipboard");
 
-        if (val === "" && isSubmit) {
-          err.textContent = "SYSTEM_ERROR: Score is required";
-          scoreInput.setAttribute("aria-invalid", "true");
-          triggerShake(scoreInput);
-          btn.disabled = false;
-          res.textContent = "--";
-          res.setAttribute("aria-label", "Grade: None");
-          stabilityFill.removeAttribute("aria-valuetext");
-          status.textContent = "";
-          copyBtn.classList.add("hidden");
-          stabilityFill.style.width = "0%";
-          return;
-        }
-
-        if (val !== "" && (val < 0 || val > 100)) {
+        if (val === "") {
+          if (isExplicitSubmit) {
+            err.textContent = "SYSTEM_ERROR: Score is required";
+            scoreInput.setAttribute("aria-invalid", "true");
+            triggerShake(scoreInput);
+            res.textContent = "--";
+            res.setAttribute("aria-label", "Grade: None");
+            stabilityFill.removeAttribute("aria-valuetext");
+            status.textContent = "";
+            copyBtn.classList.add("hidden");
+            copyShortcut.classList.add("hidden");
+            goalShortcut.classList.add("hidden");
+            stabilityFill.style.width = "0%";
+          } else {
+            err.textContent = "";
+            scoreInput.setAttribute("aria-invalid", "false");
+            btn.disabled = false;
+            btn.removeAttribute("title");
+            res.textContent = "--";
+            res.setAttribute("aria-label", "Grade: None");
+            stabilityFill.removeAttribute("aria-valuetext");
+            status.textContent = "";
+            copyBtn.classList.add("hidden");
+            copyShortcut.classList.add("hidden");
+            goalShortcut.classList.add("hidden");
+            stabilityFill.style.width = "0%";
+          }
+        } else if (val < 0 || val > 100) {
           err.textContent = "SYSTEM_ERROR: Range 0-100 only";
           scoreInput.setAttribute("aria-invalid", "true");
           if (!wasInvalid) triggerShake(scoreInput);
@@ -709,7 +720,7 @@
         }
       };
 
-      scoreInput.addEventListener("input", validate);
+      scoreInput.addEventListener("input", () => validate(false));
       scoreInput.addEventListener("focus", function () {
         this.select();
       });
@@ -719,7 +730,7 @@
             triggerShake(scoreInput);
           } else {
             triggerPulse(calcShortcut);
-            btn.click();
+            validate(true);
           }
         } else if (
           e.shiftKey &&
@@ -779,7 +790,7 @@
         if (scoreInput.getAttribute("aria-invalid") === "true") {
           triggerShake(scoreInput);
         } else {
-          btn.click();
+          validate(true);
         }
         scoreInput.focus();
       });

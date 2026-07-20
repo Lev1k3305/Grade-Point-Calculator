@@ -610,28 +610,42 @@ describe("Grade Calculation Logic", () => {
     expect(stabilityGhost.style.width).toBe("0%");
   });
 
-  it("displays SYSTEM_ERROR: Score is required on empty submission, then clears on input", () => {
+  it("defers required field validation feedback until explicit calculation attempt", () => {
     const { document } = window;
     const scoreInput = document.getElementById("score");
     const err = document.getElementById("err");
     const btn = document.getElementById("btn");
 
-    // Make sure input starts empty and has no error
+    // Initially or during typing, empty input should not show "required" error
     scoreInput.value = "";
-    scoreInput.setAttribute("aria-invalid", "false");
-    err.textContent = "";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(err.textContent).toBe("");
+    expect(scoreInput.getAttribute("aria-invalid")).toBe("false");
 
-    // Trigger click on Calculate button
+    // Clicking calculate should trigger "required" validation feedback
     btn.click();
-
     expect(err.textContent).toBe("SYSTEM_ERROR: Score is required");
     expect(scoreInput.getAttribute("aria-invalid")).toBe("true");
 
-    // Start typing to clear the error
-    scoreInput.value = "7";
+    // Typing a value should immediately clear the required error feedback
+    scoreInput.value = "5";
     scoreInput.dispatchEvent(new window.Event("input"));
-
     expect(err.textContent).toBe("");
     expect(scoreInput.getAttribute("aria-invalid")).toBe("false");
+
+    // Clearing input by typing should keep it clear of errors
+    scoreInput.value = "";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(err.textContent).toBe("");
+    expect(scoreInput.getAttribute("aria-invalid")).toBe("false");
+
+    // Pressing Enter on empty input should trigger required validation error
+    const enterEvent = new window.KeyboardEvent("keydown", {
+      key: "Enter",
+      bubbles: true,
+    });
+    scoreInput.dispatchEvent(enterEvent);
+    expect(err.textContent).toBe("SYSTEM_ERROR: Score is required");
+    expect(scoreInput.getAttribute("aria-invalid")).toBe("true");
   });
 });
