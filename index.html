@@ -361,7 +361,9 @@
               position: absolute;
               opacity: 0.3;
               background: var(--accent);
-              transition: width 0.3s ease;
+              transition:
+                width 0.3s ease,
+                background-color 0.3s ease;
             "
           ></div>
           <div
@@ -474,6 +476,23 @@
             ],
             { duration: 200, easing: "ease-out" },
           );
+        }
+      };
+
+      const showGhost = (limit, label) => {
+        if (stabilityGhost) {
+          stabilityGhost.style.width = limit + "%";
+          if (label === "D" || label === "C") {
+            stabilityGhost.style.backgroundColor = "#f1c40f";
+          } else {
+            stabilityGhost.style.backgroundColor = "var(--accent)";
+          }
+        }
+      };
+
+      const hideGhost = () => {
+        if (stabilityGhost) {
+          stabilityGhost.style.width = "0%";
         }
       };
 
@@ -640,10 +659,10 @@
                   updateInput(next.limit);
                 };
                 nextGoalBtn.onmouseenter = nextGoalBtn.onfocus = () => {
-                  stabilityGhost.style.width = next.limit + "%";
+                  showGhost(next.limit, next.label);
                 };
                 nextGoalBtn.onmouseleave = nextGoalBtn.onblur = () => {
-                  stabilityGhost.style.width = "0%";
+                  hideGhost();
                 };
               }
             }
@@ -773,17 +792,17 @@
 
       goalShortcut.addEventListener("mouseenter", () => {
         if (currentNextGoal)
-          stabilityGhost.style.width = currentNextGoal.limit + "%";
+          showGhost(currentNextGoal.limit, currentNextGoal.label);
       });
       goalShortcut.addEventListener("focus", () => {
         if (currentNextGoal)
-          stabilityGhost.style.width = currentNextGoal.limit + "%";
+          showGhost(currentNextGoal.limit, currentNextGoal.label);
       });
       goalShortcut.addEventListener("mouseleave", () => {
-        stabilityGhost.style.width = "0%";
+        hideGhost();
       });
       goalShortcut.addEventListener("blur", () => {
-        stabilityGhost.style.width = "0%";
+        hideGhost();
       });
 
       calcShortcut.addEventListener("click", () => {
