@@ -663,4 +663,51 @@ describe("Grade Calculation Logic", () => {
     expect(err.textContent).toBe("SYSTEM_ERROR: Score is required");
     expect(scoreInput.getAttribute("aria-invalid")).toBe("true");
   });
+
+  it("removes aria-valuenow when score is empty or out of range", () => {
+    const { document } = window;
+    const scoreInput = document.getElementById("score");
+    const stabilityFill = document.getElementById("stability-fill");
+
+    // Set valid value first
+    scoreInput.value = "85";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(stabilityFill.getAttribute("aria-valuenow")).toBe("85");
+
+    // Set empty value
+    scoreInput.value = "";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(stabilityFill.hasAttribute("aria-valuenow")).toBe(false);
+
+    // Set valid value again
+    scoreInput.value = "70";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(stabilityFill.getAttribute("aria-valuenow")).toBe("70");
+
+    // Set invalid value
+    scoreInput.value = "105";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    expect(stabilityFill.hasAttribute("aria-valuenow")).toBe(false);
+  });
+
+  it("renders the shift modifier keyboard shortcut hint in label", () => {
+    const { document } = window;
+    const shiftHint = document.querySelector(".shift-hint");
+    expect(shiftHint).not.toBeNull();
+    expect(shiftHint.textContent.trim()).toBe("[SHIFT + ↕ TO ±10]");
+  });
+
+  it("triggers pulse on the calculate button", () => {
+    const { document } = window;
+    const btn = document.getElementById("btn");
+
+    // Mock animate on Element prototype of JSDOM window
+    window.Element.prototype.animate = vi
+      .fn()
+      .mockReturnValue({ finished: Promise.resolve() });
+    const animateSpy = vi.spyOn(btn, "animate");
+
+    btn.click();
+    expect(animateSpy).toHaveBeenCalled();
+  });
 });
