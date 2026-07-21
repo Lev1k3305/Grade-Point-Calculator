@@ -61,6 +61,9 @@
         margin-bottom: 8px;
         text-transform: uppercase;
       }
+      .input-group:focus-within .shift-hint {
+        opacity: 1 !important;
+      }
       input {
         width: 100%;
         background: var(--bg);
@@ -334,9 +337,32 @@
       </div>
       <h1>Grade Calculator</h1>
       <div class="input-group">
-        <label for="score">
-          Score (0-100)
-          <span style="color: var(--pink)" aria-hidden="true">*</span>
+        <label
+          for="score"
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+          "
+        >
+          <span>
+            Score (0-100)
+            <span style="color: var(--pink)" aria-hidden="true">*</span>
+          </span>
+          <span
+            class="shift-hint"
+            style="
+              color: var(--dim);
+              font-size: 0.6rem;
+              opacity: 0;
+              transition: opacity 0.2s ease-in-out;
+              pointer-events: none;
+            "
+            aria-hidden="true"
+          >
+            [SHIFT + ↕ TO ±10]
+          </span>
         </label>
         <input
           type="number"
@@ -543,6 +569,7 @@
         copyBtn.setAttribute("aria-label", "Copy grade to clipboard");
 
         if (val === "") {
+          stabilityFill.removeAttribute("aria-valuenow");
           if (isExplicitSubmit) {
             err.textContent = "SYSTEM_ERROR: Score is required";
             scoreInput.setAttribute("aria-invalid", "true");
@@ -570,6 +597,7 @@
             stabilityFill.style.width = "0%";
           }
         } else if (val < 0 || val > 100) {
+          stabilityFill.removeAttribute("aria-valuenow");
           err.textContent = "SYSTEM_ERROR: Range 0-100 only";
           scoreInput.setAttribute("aria-invalid", "true");
           if (!wasInvalid) triggerShake(scoreInput);
@@ -829,7 +857,10 @@
         }
       });
 
-      btn.addEventListener("click", () => validate(true));
+      btn.addEventListener("click", () => {
+        triggerPulse(btn);
+        validate(true);
+      });
 
       copyBtn.addEventListener("click", () => {
         if (res.textContent === "--" || isAlreadyCopied) return;

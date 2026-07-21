@@ -24,3 +24,8 @@
 
 **Learning:** When using visual predictive indicators like ghost progress bars, synchronizing their color with the specific target milestone grade (e.g., yellow for lower-tier passing grades C and D, cyan/accent for higher-tier grades B, A, A+) provides instant contextual cues that align directly with the user's focus and expectations.
 **Action:** Always map predictive visual elements to the exact contextual design system colors of their target outcome.
+
+## 2026-07-21 - Input Clear Accessibility
+
+**Learning:** When resetting or clearing user input, explicitly removing state-dependent ARIA attributes (such as `aria-valuenow` on progress bars) is critical to prevent assistive technologies from announcing stale or irrelevant information.
+**Action:** Ensure all dynamic ARIA progress indicators are fully unset when target inputs are cleared.
