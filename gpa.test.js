@@ -585,9 +585,10 @@ describe("Grade Calculation Logic", () => {
     const nextGoalBtn = status.querySelector(".status-link");
     expect(nextGoalBtn).not.toBeNull();
 
-    // Hover
+    // Hover - target is A+ (higher tier) -> background color should be var(--accent)
     nextGoalBtn.dispatchEvent(new window.Event("mouseenter"));
     expect(stabilityGhost.style.width).toBe("90%");
+    expect(stabilityGhost.style.backgroundColor).toBe("var(--accent)");
 
     // Unhover
     nextGoalBtn.dispatchEvent(new window.Event("mouseleave"));
@@ -596,6 +597,7 @@ describe("Grade Calculation Logic", () => {
     // Focus
     nextGoalBtn.dispatchEvent(new window.Event("focus"));
     expect(stabilityGhost.style.width).toBe("90%");
+    expect(stabilityGhost.style.backgroundColor).toBe("var(--accent)");
 
     // Blur
     nextGoalBtn.dispatchEvent(new window.Event("blur"));
@@ -604,10 +606,23 @@ describe("Grade Calculation Logic", () => {
     // Goal Shortcut Hover
     goalShortcut.dispatchEvent(new window.Event("mouseenter"));
     expect(stabilityGhost.style.width).toBe("90%");
+    expect(stabilityGhost.style.backgroundColor).toBe("var(--accent)");
 
     // Goal Shortcut Unhover
     goalShortcut.dispatchEvent(new window.Event("mouseleave"));
     expect(stabilityGhost.style.width).toBe("0%");
+
+    // Change to a lower tier (e.g. 45 -> next is D) -> background color should be #f1c40f
+    scoreInput.value = "45";
+    scoreInput.dispatchEvent(new window.Event("input"));
+    const lowerGoalBtn = status.querySelector(".status-link");
+    expect(lowerGoalBtn).not.toBeNull();
+
+    lowerGoalBtn.dispatchEvent(new window.Event("mouseenter"));
+    expect(stabilityGhost.style.width).toBe("50%");
+    expect(stabilityGhost.style.backgroundColor).toMatch(
+      /rgb\(241,\s*196,\s*15\)|#f1c40f/,
+    );
   });
 
   it("defers required field validation feedback until explicit calculation attempt", () => {

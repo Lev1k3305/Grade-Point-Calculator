@@ -19,3 +19,8 @@
 
 **Learning:** Premature validation on empty required fields (like showing shaking animations, red borders, or "SYSTEM_ERROR: Score is required" immediately when the page loads or when a user is in the middle of clearing/typing) creates an aggressive and jarring user experience.
 **Action:** Defer required field validation until the user explicitly attempts a submit action (clicking Calculate or pressing Enter), but clear the error immediately once they begin typing.
+
+## 2025-05-25 - Predictive Ghost Preview Color Synchronization
+
+**Learning:** When using visual predictive indicators like ghost progress bars, synchronizing their color with the specific target milestone grade (e.g., yellow for lower-tier passing grades C and D, cyan/accent for higher-tier grades B, A, A+) provides instant contextual cues that align directly with the user's focus and expectations.
+**Action:** Always map predictive visual elements to the exact contextual design system colors of their target outcome.
