@@ -663,4 +663,22 @@ describe("Grade Calculation Logic", () => {
     expect(err.textContent).toBe("SYSTEM_ERROR: Score is required");
     expect(scoreInput.getAttribute("aria-invalid")).toBe("true");
   });
+
+  it("renders the Shift+Arrow shortcut hint in the label", () => {
+    const { document } = window;
+    const focusHint = document.querySelector(".focus-hint");
+    expect(focusHint).not.toBeNull();
+    expect(focusHint.textContent).toBe("[SHIFT + ↕ TO ±10]");
+  });
+
+  it("triggers a pulse animation on the calculate button when clicked", () => {
+    const { document } = window;
+    const btn = document.getElementById("btn");
+    if (!window.Element.prototype.animate) {
+      window.Element.prototype.animate = vi.fn();
+    }
+    const animateSpy = vi.spyOn(window.Element.prototype, "animate");
+    btn.click();
+    expect(animateSpy).toHaveBeenCalled();
+  });
 });

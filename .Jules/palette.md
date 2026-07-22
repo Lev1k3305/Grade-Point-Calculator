@@ -24,3 +24,8 @@
 
 **Learning:** When using visual predictive indicators like ghost progress bars, synchronizing their color with the specific target milestone grade (e.g., yellow for lower-tier passing grades C and D, cyan/accent for higher-tier grades B, A, A+) provides instant contextual cues that align directly with the user's focus and expectations.
 **Action:** Always map predictive visual elements to the exact contextual design system colors of their target outcome.
+
+## 2025-07-22 - Focus-conditional Keyboard Hints and Interactive Click Feedback
+
+**Learning:** Teaching keyboard shortcuts natively inside form labels using focus-conditional (`:focus-within`) hints keeps the aesthetic minimal and clean, while helping keyboard power-users discover advanced controls. Additionally, tactile visual click feedback on primary buttons (such as `#btn`) bridges physical interaction and visual results.
+**Action:** For keyboard-friendly forms, use `:focus-within` on the parent container to show keyboard hints in input labels, and apply standard pulse animations to primary trigger buttons.

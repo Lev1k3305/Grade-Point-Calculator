@@ -55,11 +55,23 @@
         color: #fff;
       }
       label {
-        display: block;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         font-size: 0.7rem;
         color: var(--accent);
         margin-bottom: 8px;
         text-transform: uppercase;
+      }
+      .focus-hint {
+        opacity: 0;
+        color: var(--dim);
+        font-size: 0.7rem;
+        transition: opacity 0.3s ease;
+        text-transform: uppercase;
+      }
+      .input-group:focus-within .focus-hint {
+        opacity: 1;
       }
       input {
         width: 100%;
@@ -335,7 +347,10 @@
       <h1>Grade Calculator</h1>
       <div class="input-group">
         <label for="score">
-          Score (0-100)
+          <span
+            >Score (0-100)
+            <span class="focus-hint">[SHIFT + ↕ TO ±10]</span></span
+          >
           <span style="color: var(--pink)" aria-hidden="true">*</span>
         </label>
         <input
@@ -829,7 +844,10 @@
         }
       });
 
-      btn.addEventListener("click", () => validate(true));
+      btn.addEventListener("click", () => {
+        triggerPulse(btn);
+        validate(true);
+      });
 
       copyBtn.addEventListener("click", () => {
         if (res.textContent === "--" || isAlreadyCopied) return;
