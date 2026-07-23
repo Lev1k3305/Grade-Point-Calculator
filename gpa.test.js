@@ -320,6 +320,17 @@ describe("Grade Calculation Logic", () => {
     expect(window.navigator.clipboard.writeText).toHaveBeenCalledWith("A");
   });
 
+  it("assigns appropriate semantic status classes to quick actions / shortcut hint buttons", () => {
+    const { document } = window;
+    const resetShortcut = document.getElementById("reset-shortcut");
+    const copyShortcut = document.getElementById("copy-shortcut");
+    const goalShortcut = document.getElementById("goal-shortcut");
+
+    expect(resetShortcut.classList.contains("status-fail")).toBe(true);
+    expect(copyShortcut.classList.contains("status-good")).toBe(true);
+    expect(goalShortcut.classList.contains("status-ok")).toBe(true);
+  });
+
   it("handles 'G' next goal shortcut", () => {
     const { document } = window;
     const scoreInput = document.getElementById("score");
